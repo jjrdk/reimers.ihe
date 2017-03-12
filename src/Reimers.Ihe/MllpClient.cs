@@ -17,6 +17,7 @@
     {
         private readonly string _address;
         private readonly int _port;
+        private readonly Encoding _encoding;
         private readonly X509CertificateCollection _clientCertificates;
         private string _remoteAddress;
         private readonly TaskCompletionSource<Hl7Message> _completionSource = new TaskCompletionSource<Hl7Message>();
@@ -25,19 +26,21 @@
         private TcpClient _tcpClient;
         private Task _readThread;
 
-        private MllpClient(string address, int port, X509CertificateCollection clientCertificates)
+        private MllpClient(string address, int port, Encoding encoding, X509CertificateCollection clientCertificates)
         {
             _address = address;
             _port = port;
+            _encoding = encoding;
             _clientCertificates = clientCertificates;
         }
 
         public static async Task<IMllpConnection> Create(
             string address,
             int port,
+            Encoding encoding = null,
             X509CertificateCollection clientCertificates = null)
         {
-            var instance = new MllpClient(address, port, clientCertificates);
+            var instance = new MllpClient(address, port, encoding ?? Encoding.ASCII, clientCertificates);
             await instance.Setup().ConfigureAwait(false);
 
             return instance;
@@ -46,7 +49,7 @@
         public async Task<Hl7Message> Send(string message, CancellationToken cancellationToken = default(CancellationToken))
         {
             var buffer =
-                Constants.StartBlock.Concat(Encoding.ASCII.GetBytes(message)).Concat(Constants.EndBlock).ToArray();
+                Constants.StartBlock.Concat(_encoding.GetBytes(message)).Concat(Constants.EndBlock).ToArray();
             await _stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
             return await _completionSource.Task;
         }
@@ -88,7 +91,7 @@
                     if (Constants.EndBlock.SequenceEqual(new[] { previous, current }))
                     {
                         messageBuilder.RemoveAt(messageBuilder.Count - 1);
-                        var s = Encoding.ASCII.GetString(messageBuilder.ToArray());
+                        var s = _encoding.GetString(messageBuilder.ToArray());
 
                         var message = new Hl7Message(s, _remoteAddress);
                         _completionSource.SetResult(message);

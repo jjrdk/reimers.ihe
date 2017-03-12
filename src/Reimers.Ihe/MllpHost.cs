@@ -16,22 +16,24 @@ namespace Reimers.Ihe
     internal class MllpHost : IDisposable
     {
         private readonly TcpClient _client;
+        private readonly Encoding _encoding;
         private readonly IHl7MessageMiddleware _middleware;
         private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
         private Stream _stream;
         private Task _readThread;
 
-        private MllpHost(TcpClient client, IHl7MessageMiddleware middleware)
+        private MllpHost(TcpClient client, Encoding encoding, IHl7MessageMiddleware middleware)
         {
             _client = client;
+            _encoding = encoding;
             _middleware = middleware;
         }
 
         public bool IsConnected => _client.Connected;
 
-        public static async Task<MllpHost> Create(TcpClient tcpClient, IHl7MessageMiddleware middleware, X509Certificate serverCertificate = null)
+        public static async Task<MllpHost> Create(TcpClient tcpClient, IHl7MessageMiddleware middleware, Encoding encoding = null, X509Certificate serverCertificate = null)
         {
-            var host = new MllpHost(tcpClient, middleware);
+            var host = new MllpHost(tcpClient, encoding ?? Encoding.ASCII, middleware);
             var stream = tcpClient.GetStream();
             if (serverCertificate != null)
             {
@@ -108,7 +110,7 @@ namespace Reimers.Ihe
             byte[] messageBuilder, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var s = Encoding.ASCII.GetString(messageBuilder);
+            var s = _encoding.GetString(messageBuilder);
 
             var message = new Hl7Message(
                 s,
@@ -122,7 +124,7 @@ namespace Reimers.Ihe
         {
             var buffer =
                 Constants.StartBlock
-                    .Concat(Encoding.ASCII.GetBytes(response))
+                    .Concat(_encoding.GetBytes(response))
                     .Concat(Constants.EndBlock)
                     .ToArray();
             await _stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken);

@@ -1,6 +1,7 @@
 ﻿namespace Reimers.Ihe
 {
     using System;
+    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
     using NHapi.Base.Model;
@@ -25,6 +26,7 @@
             using (var connection = await _connectionFactory())
             {
                 var response = await connection.Send(hl7, cancellationToken);
+                Trace.TraceInformation(response.Message);
                 var receive = (TReceive)_parser.Parse(response.Message);
 
                 return receive;

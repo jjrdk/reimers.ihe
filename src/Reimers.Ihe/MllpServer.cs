@@ -6,12 +6,14 @@
     using System.Net;
     using System.Net.Sockets;
     using System.Security.Cryptography.X509Certificates;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
 
     public class MllpServer : IDisposable
     {
         private readonly IHl7MessageMiddleware _middleware;
+        private readonly Encoding _encoding;
         private readonly X509Certificate _serverCertificate;
         private readonly TcpListener _listener;
         private readonly List<MllpHost> _connections = new List<MllpHost>();
@@ -19,9 +21,10 @@
         private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
         private Task _readTask;
 
-        public MllpServer(IPEndPoint endPoint, IHl7MessageMiddleware middleware, X509Certificate serverCertificate = null)
+        public MllpServer(IPEndPoint endPoint, IHl7MessageMiddleware middleware, Encoding encoding = null, X509Certificate serverCertificate = null)
         {
             _middleware = middleware;
+            _encoding = encoding;
             _serverCertificate = serverCertificate;
             _listener = new TcpListener(endPoint);
             _timer = new Timer(CleanConnections, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
@@ -54,7 +57,7 @@
             {
                 var client = await _listener.AcceptTcpClientAsync().ConfigureAwait(false);
 
-                var connection = await MllpHost.Create(client, _middleware, _serverCertificate);
+                var connection = await MllpHost.Create(client, _middleware, _encoding, _serverCertificate);
                 lock (_connections)
                 {
                     _connections.Add(connection);
