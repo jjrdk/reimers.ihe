@@ -3,10 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using Microsoft.Owin.Hosting;
     using NHapi.Base.Parser;
-    using NHapi.Model.V251.Message;
     using Owin;
 
     public class IheHttpServer : IDisposable
