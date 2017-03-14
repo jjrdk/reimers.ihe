@@ -11,10 +11,10 @@
         where TSend : IMessage
         where TReceive : IMessage
     {
-        private readonly Func<Task<IMllpConnection>> _connectionFactory;
+        private readonly Func<Task<IHostConnection>> _connectionFactory;
         private readonly PipeParser _parser;
 
-        protected IheTransaction(Func<Task<IMllpConnection>> connectionFactory, PipeParser parser)
+        protected IheTransaction(Func<Task<IHostConnection>> connectionFactory, PipeParser parser)
         {
             _connectionFactory = connectionFactory;
             _parser = parser;

@@ -1,27 +1,26 @@
-﻿namespace Reimers.Ihe
+namespace Reimers.Ihe.Http
 {
+    using System;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
     using System.Threading.Tasks;
 
-    public class DefaultMllpConnectionFactory
+    public class DefaultHttpConnectionFactory
     {
-        private readonly string _address;
-        private readonly int _port;
+        private readonly Uri _address;
         private readonly Encoding _encoding;
         private readonly X509CertificateCollection _clientCertificateCollection;
 
-        public DefaultMllpConnectionFactory(string address, int port, Encoding encoding = null, X509CertificateCollection clientCertificateCollection = null)
+        public DefaultHttpConnectionFactory(Uri address, Encoding encoding = null, X509CertificateCollection clientCertificateCollection = null)
         {
             _address = address;
-            _port = port;
             _encoding = encoding;
             _clientCertificateCollection = clientCertificateCollection;
         }
 
         public Task<IHostConnection> Get()
         {
-            return MllpClient.Create(_address, _port, _encoding, _clientCertificateCollection);
+            return Task.FromResult<IHostConnection>(new IheHttpClient(_address, _encoding, _clientCertificateCollection));
         }
     }
 }

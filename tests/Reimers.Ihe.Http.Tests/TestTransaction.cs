@@ -1,4 +1,4 @@
-﻿namespace Reimers.Ihe.Tests
+﻿namespace Reimers.Ihe.Http.Tests
 {
     using System;
     using System.Threading.Tasks;

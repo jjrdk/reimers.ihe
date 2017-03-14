@@ -9,6 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0745F841
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reimers.Ihe.Tests", "tests\Reimers.Ihe.Tests\Reimers.Ihe.Tests.csproj", "{B505145A-1443-4709-8582-295D746A69AF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "reimers.ihe.http", "src\reimers.ihe.http\reimers.ihe.http.csproj", "{1C5FD77E-066D-4713-BE24-9CF259B64EA3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reimers.Ihe.Http.Tests", "tests\Reimers.Ihe.Http.Tests\Reimers.Ihe.Http.Tests.csproj", "{D817A388-4AB8-41E0-9052-1B38B64B3857}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,11 +27,20 @@ Global
 		{B505145A-1443-4709-8582-295D746A69AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B505145A-1443-4709-8582-295D746A69AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B505145A-1443-4709-8582-295D746A69AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C5FD77E-066D-4713-BE24-9CF259B64EA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C5FD77E-066D-4713-BE24-9CF259B64EA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C5FD77E-066D-4713-BE24-9CF259B64EA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C5FD77E-066D-4713-BE24-9CF259B64EA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D817A388-4AB8-41E0-9052-1B38B64B3857}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D817A388-4AB8-41E0-9052-1B38B64B3857}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D817A388-4AB8-41E0-9052-1B38B64B3857}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D817A388-4AB8-41E0-9052-1B38B64B3857}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{B505145A-1443-4709-8582-295D746A69AF} = {0745F841-D37A-4897-B7CF-58AF124A66EC}
+		{D817A388-4AB8-41E0-9052-1B38B64B3857} = {0745F841-D37A-4897-B7CF-58AF124A66EC}
 	EndGlobalSection
 EndGlobal

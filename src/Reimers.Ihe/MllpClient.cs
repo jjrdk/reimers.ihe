@@ -13,7 +13,7 @@
     using System.Threading;
     using System.Threading.Tasks;
 
-    internal class MllpClient : IMllpConnection
+    internal class MllpClient : IHostConnection
     {
         private readonly string _address;
         private readonly int _port;
@@ -34,7 +34,7 @@
             _clientCertificates = clientCertificates;
         }
 
-        public static async Task<IMllpConnection> Create(
+        public static async Task<IHostConnection> Create(
             string address,
             int port,
             Encoding encoding = null,
