@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Reimers.Ihe</PackageId>
-    <Title>reimers.ihe</Title>
+    <Title>Reimers.Ihe</Title>
     <Version>0.1.0</Version>
     <Authors>Jacob Reimers</Authors>
     <Owners>Jacob Reimers</Owners>

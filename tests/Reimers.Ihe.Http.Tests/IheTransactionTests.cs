@@ -9,7 +9,6 @@
     public class IheTransactionTests : IDisposable
     {
         private readonly IheHttpServer _server;
-        private int _port = 8080;
 
         public IheTransactionTests()
         {
