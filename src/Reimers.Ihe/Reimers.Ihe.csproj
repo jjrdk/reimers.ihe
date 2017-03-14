@@ -18,6 +18,8 @@
   <PropertyGroup>
     <DocumentationFile>bin\$(Configuration)\net461\Reimers.Ihe.xml</DocumentationFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <AssemblyName>reimers.ihe</AssemblyName>
+    <Product>Reimers IHE</Product>
   </PropertyGroup>
 
   <ItemGroup>
