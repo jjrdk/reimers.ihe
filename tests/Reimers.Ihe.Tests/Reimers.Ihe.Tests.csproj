@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DocumentationFile>bin\$(Configuration)\net461\Reimers.Ihe.xml</DocumentationFile>
+    <DocumentationFile></DocumentationFile>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
