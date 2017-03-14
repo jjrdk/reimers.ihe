@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+CONFIGURATION := Release
+
+%:
+	dh $@
+
+override_dh_auto_clean:
+	dotnet clean
+
+override_dh_auto_build:
+	dotnet msbuild /p:Configuration=$(CONFIGURATION) src/reimers.ihe.sln
+
+override_dh_auto_install:
+	dh_auto_install

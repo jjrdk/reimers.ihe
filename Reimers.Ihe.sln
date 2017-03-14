@@ -1,17 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reimers.Ihe", "src\Reimers.Ihe\Reimers.Ihe.csproj", "{CB107B78-C76D-40E5-BE26-6EAE1AA85D6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reimers.Ihe.Communication", "src\Reimers.Ihe.Communication\Reimers.Ihe.Communication.csproj", "{CB107B78-C76D-40E5-BE26-6EAE1AA85D6C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0745F841-D37A-4897-B7CF-58AF124A66EC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reimers.Ihe.Tests", "tests\Reimers.Ihe.Tests\Reimers.Ihe.Tests.csproj", "{B505145A-1443-4709-8582-295D746A69AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reimers.Ihe.Communication.Tests", "tests\Reimers.Ihe.Communication.Tests\Reimers.Ihe.Communication.Tests.csproj", "{B505145A-1443-4709-8582-295D746A69AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reimers.Ihe.Http", "src\reimers.ihe.http\reimers.ihe.http.csproj", "{1C5FD77E-066D-4713-BE24-9CF259B64EA3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reimers.Ihe.Communication.Http", "src\Reimers.Ihe.Communication.Http\Reimers.Ihe.Communication.Http.csproj", "{1C5FD77E-066D-4713-BE24-9CF259B64EA3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reimers.Ihe.Http.Tests", "tests\Reimers.Ihe.Http.Tests\Reimers.Ihe.Http.Tests.csproj", "{D817A388-4AB8-41E0-9052-1B38B64B3857}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reimers.Ihe.Communication.Http.Tests", "tests\Reimers.Ihe.Communication.Http.Tests\Reimers.Ihe.Communication.Http.Tests.csproj", "{D817A388-4AB8-41E0-9052-1B38B64B3857}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

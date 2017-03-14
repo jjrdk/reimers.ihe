@@ -1,0 +1,30 @@
+Source: reimers.ihe
+Section: misc
+Priority: optional
+Maintainer: Jacob Reimers <jacob@reimers.dk>
+Build-Depends: debhelper (>= 8), dotnet-dev
+Standards-Version: 3.9.3
+
+Package: nupkg-reimers-ihe
+Section: misc
+Architecture: any
+Depends: ${misc:Depends}
+Description: Classes to handle MLLP connections and IHE transactions.
+
+Package: libmono-reimers-ihe
+Section: misc
+Architecture: any
+Depends: ${misc:Depends}
+Description: Classes to handle MLLP connections and IHE transactions.
+
+Package: nupkg-reimers-ihe-http
+Section: misc
+Architecture: any
+Depends: ${misc:Depends}
+Description: Classes to handle HTTP connections and IHE transactions.
+
+Package: libmono-reimers-ihe-http
+Section: misc
+Architecture: any
+Depends: ${misc:Depends}
+Description: Classes to handle HTTP connections and IHE transactions.

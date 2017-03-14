@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Reimers.Ihe.Communication.Tests</PackageId>
+    <Title>reimers.ihe.communication.tests</Title>
+    <Version>0.1.0</Version>
+    <Authors>Jacob Reimers</Authors>
+    <Owners>Jacob Reimers</Owners>
+    <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
+    <Description>Classes to handle MLLP connections and transactions.</Description>
+    <Copyright>Reimers.dk © 2016 - 2017</Copyright>
+    <Company>Reimers.dk</Company>
+    <TargetFramework>net461</TargetFramework>
+    <PackageTags>HL7 IHE</PackageTags>
+    <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DocumentationFile></DocumentationFile>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="nHapi" Version="2.5.0.6" />
+    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
+    <ProjectReference Include="..\..\src\Reimers.Ihe.Communication\Reimers.Ihe.Communication.csproj" />
+    <Reference Include="System" />
+  </ItemGroup>
+
+</Project>
