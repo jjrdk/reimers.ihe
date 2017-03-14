@@ -37,7 +37,7 @@ namespace Reimers.Ihe
             var stream = tcpClient.GetStream();
             if (serverCertificate != null)
             {
-                var ssl = new SslStream(stream, false, host.RemoteCertificateValidationCallback);
+                var ssl = new SslStream(stream, false);
 
                 await ssl.AuthenticateAsServerAsync(serverCertificate, true, SslProtocols.Default | SslProtocols.Tls12, false).ConfigureAwait(false);
                 host._stream = ssl;
@@ -128,11 +128,6 @@ namespace Reimers.Ihe
                     .Concat(Constants.EndBlock)
                     .ToArray();
             await _stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken);
-        }
-
-        private bool RemoteCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors errors)
-        {
-            return true;
         }
     }
 }
