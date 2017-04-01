@@ -5,7 +5,9 @@
     using System.Threading;
     using System.Threading.Tasks;
     using NHapi.Base.Model;
-    using NHapi.Base.Parser;    /// <summary>
+    using NHapi.Base.Parser;
+
+    /// <summary>
     /// Defines the abstract base class for IHE transactions.
     /// </summary>
     /// <typeparam name="TSend">The IHE message to send.</typeparam>
@@ -15,7 +17,9 @@
         where TReceive : IMessage
     {
         private readonly Func<Task<IHostConnection>> _connectionFactory;
-        private readonly PipeParser _parser;        /// <summary>
+        private readonly PipeParser _parser;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="IheTransaction{TSend,TReceive}"/> class.
         /// </summary>
         /// <param name="connectionFactory"></param>
@@ -24,7 +28,9 @@
         {
             _connectionFactory = connectionFactory;
             _parser = parser;
-        }        /// <summary>
+        }
+
+        /// <summary>
         /// Sends the passed message and awaits the response from the server.
         /// If the server response cannot be parsed as the expected response an exception will be thrown.
         /// </summary>
@@ -34,13 +40,16 @@
         public async Task<TReceive> Send(TSend message, CancellationToken cancellationToken = default(CancellationToken))
         {
             var hl7 = _parser.Encode(message);
-            using (var connection = await _connectionFactory())
+            using (var connection = await _connectionFactory().ConfigureAwait(false))
             {
-                var response = await connection.Send(hl7, cancellationToken);
+                var response = await connection.Send(hl7, cancellationToken).ConfigureAwait(false);
                 Trace.TraceInformation(response.Message);
-                var receive = (TReceive)_parser.Parse(response.Message);                return receive;
+                var receive = (TReceive) _parser.Parse(response.Message);
+                return receive;
             }
-        }        /// <summary>
+        }
+
+        /// <summary>
         /// Defines a default message header configuration for the transaction.
         /// </summary>
         /// <param name="message">The message whose header should be configured.</param>

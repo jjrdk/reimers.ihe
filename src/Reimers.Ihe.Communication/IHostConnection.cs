@@ -2,7 +2,9 @@
 {
     using System;
     using System.Threading;
-    using System.Threading.Tasks;    /// <summary>
+    using System.Threading.Tasks;
+
+    /// <summary>
     /// Defines the interface for a connection to an IHE host.
     /// </summary>
     public interface IHostConnection : IDisposable

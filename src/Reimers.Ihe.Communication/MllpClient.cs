@@ -46,7 +46,8 @@
             return instance;
         }
 
-        public async Task<Hl7Message> Send(string message, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Hl7Message> Send(string message,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             lock (_stream)
             {
@@ -60,7 +61,8 @@
             var buffer = new byte[bytes.Length + Constants.StartBlock.Length + Constants.EndBlock.Length];
             Array.Copy(Constants.StartBlock, 0, buffer, 0, Constants.StartBlock.Length);
             Array.Copy(bytes, 0, buffer, Constants.StartBlock.Length, bytes.Length);
-            Array.Copy(Constants.EndBlock, 0, buffer, Constants.StartBlock.Length + bytes.Length, Constants.EndBlock.Length);
+            Array.Copy(Constants.EndBlock, 0, buffer, Constants.StartBlock.Length + bytes.Length,
+                Constants.EndBlock.Length);
 
             await _stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
             return await _completionSource.Task.ConfigureAwait(false);
@@ -98,8 +100,8 @@
                 while (true)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    var current = (byte)_stream.ReadByte();
-                    if (Constants.EndBlock.SequenceEqual(new[] { previous, current }))
+                    var current = (byte) _stream.ReadByte();
+                    if (Constants.EndBlock.SequenceEqual(new[] {previous, current}))
                     {
                         messageBuilder.RemoveAt(messageBuilder.Count - 1);
                         var s = _encoding.GetString(messageBuilder.ToArray());

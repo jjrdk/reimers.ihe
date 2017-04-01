@@ -14,13 +14,19 @@
         {
             Message = message;
             SourceAddress = sourceAddress;
-        }        /// <summary>
+        }
+
+        /// <summary>
         /// Gets the address the message was received from.
         /// </summary>
-        public string SourceAddress { get; }        /// <summary>
+        public string SourceAddress { get; }
+
+        /// <summary>
         /// Gets the raw received HL7 message.
         /// </summary>
-        public string Message { get; }        /// <inheritdoc />
+        public string Message { get; }
+
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             return (SourceAddress + Message).GetHashCode();

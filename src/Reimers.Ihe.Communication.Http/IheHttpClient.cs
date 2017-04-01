@@ -6,18 +6,27 @@
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
     using System.Threading;
-    using System.Threading.Tasks;    internal class IheHttpClient : IHostConnection
+    using System.Threading.Tasks;
+
+    internal class IheHttpClient : IHostConnection
     {
         private readonly Uri _address;
         private readonly Encoding _encoding;
-        private readonly X509CertificateCollection _clientCertificates;        public IheHttpClient(Uri address, Encoding encoding = null, X509CertificateCollection clientCertificates = null)
+        private readonly X509CertificateCollection _clientCertificates;
+
+        public IheHttpClient(Uri address, Encoding encoding = null, X509CertificateCollection clientCertificates = null)
         {
             _address = address;
             _encoding = encoding ?? Encoding.ASCII;
             _clientCertificates = clientCertificates ?? new X509Certificate2Collection();
-        }        public void Dispose()
+        }
+
+        public void Dispose()
         {
-        }        public async Task<Hl7Message> Send(string message, CancellationToken cancellationToken = default(CancellationToken))
+        }
+
+        public async Task<Hl7Message> Send(string message,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             var request = WebRequest.CreateHttp(_address);
             request.Method = "POST";

@@ -1,6 +1,8 @@
 ﻿namespace Reimers.Ihe.Communication
 {
-    using System.Threading.Tasks;    /// <summary>
+    using System.Threading.Tasks;
+
+    /// <summary>
     /// Defines the public interface for middleware for handling HL7 messages.
     /// </summary>
     public interface IHl7MessageMiddleware
