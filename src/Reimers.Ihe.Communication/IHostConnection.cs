@@ -10,13 +10,22 @@
     public interface IHostConnection : IDisposable
     {
         /// <summary>
-        /// Sends the passed message to the server and awaits the response.
+        /// Defines an event that will be raised every time the connection state is changed.
         /// </summary>
-        /// <param name="message">The message to send.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken"/> for the operation.</param>
-        /// <returns>An <see cref="Hl7Message"/> containing the response and source address.</returns>
-        Task<Hl7Message> Send(
-            string message,
-            CancellationToken cancellationToken = default(CancellationToken));
+        event EventHandler<ConnectionStateEventArgs> OnConnectionStateChanged;
+
+        /// <summary> 
+        /// Sends the passed message to the server and awaits the response. 
+        /// </summary> 
+        /// <param name="message">The message to send.</param> 
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> for the operation.</param> 
+        /// <returns>A string containing the response and source address.</returns> 
+        Task<Hl7Message> Send(string message, CancellationToken cancellationToken = default(CancellationToken));
+
+        /// <summary>
+        /// Determines whether the connection is established or not.
+        /// </summary>
+        /// <returns>True if the connection is established.</returns>
+        bool IsConnectionEstablished();
     }
 }

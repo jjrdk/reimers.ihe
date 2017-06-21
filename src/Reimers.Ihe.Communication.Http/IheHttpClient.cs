@@ -25,6 +25,9 @@
         {
         }
 
+        /// <inheritdoc />
+        public event EventHandler<ConnectionStateEventArgs> OnConnectionStateChanged;
+
         public async Task<Hl7Message> Send(string message,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -48,6 +51,12 @@
                     return new Hl7Message(responseContent, _address.ToString());
                 }
             }
+        }
+
+        /// <inheritdoc />
+        public bool IsConnectionEstablished()
+        {
+            return true;
         }
     }
 }
