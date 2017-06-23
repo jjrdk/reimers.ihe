@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Net;
+    using System.Net.Security;
     using System.Net.Sockets;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
@@ -18,6 +19,7 @@
         private readonly IHl7MessageMiddleware _middleware;
         private readonly Encoding _encoding;
         private readonly X509Certificate _serverCertificate;
+        private readonly RemoteCertificateValidationCallback _userCertificateValidationCallback;
         private readonly TcpListener _listener;
         private readonly List<MllpHost> _connections = new List<MllpHost>();
         private readonly Timer _timer;
@@ -31,12 +33,14 @@
         /// <param name="middleware">The message handling middleware.</param>
         /// <param name="encoding">The <see cref="Encoding"/> to use for network transfers.</param>
         /// <param name="serverCertificate">The certificates to use for secure connections.</param>
+        /// <param name="userCertificateValidationCallback">Optional certificate validation callback.</param>
         public MllpServer(IPEndPoint endPoint, IHl7MessageMiddleware middleware, Encoding encoding = null,
-            X509Certificate serverCertificate = null)
+            X509Certificate serverCertificate = null, RemoteCertificateValidationCallback userCertificateValidationCallback = null)
         {
             _middleware = middleware;
             _encoding = encoding;
             _serverCertificate = serverCertificate;
+            _userCertificateValidationCallback = userCertificateValidationCallback;
             _listener = new TcpListener(endPoint);
             _timer = new Timer(CleanConnections, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
         }
@@ -72,7 +76,7 @@
             {
                 var client = await _listener.AcceptTcpClientAsync().ConfigureAwait(false);
                 var connection =
-                    await MllpHost.Create(client, _middleware, _encoding, _serverCertificate).ConfigureAwait(false);
+                    await MllpHost.Create(client, _middleware, _encoding, _serverCertificate, _userCertificateValidationCallback).ConfigureAwait(false);
                 lock (_connections)
                 {
                     _connections.Add(connection);

@@ -21,6 +21,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\cert.pfx" Link="cert.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="nHapi" Version="2.5.0.6" />
     <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />

@@ -32,15 +32,14 @@ namespace Reimers.Ihe.Communication
         public bool IsConnected => _client.Connected;
 
         public static async Task<MllpHost> Create(TcpClient tcpClient, IHl7MessageMiddleware middleware,
-            Encoding encoding = null, X509Certificate serverCertificate = null)
+            Encoding encoding = null, X509Certificate serverCertificate = null, RemoteCertificateValidationCallback userCertificateValidationCallback = null)
         {
             var host = new MllpHost(tcpClient, encoding ?? Encoding.ASCII, middleware);
             var stream = tcpClient.GetStream();
             if (serverCertificate != null)
             {
-                var ssl = new SslStream(stream, false);
-                await ssl.AuthenticateAsServerAsync(serverCertificate, true, SslProtocols.Default | SslProtocols.Tls12,
-                    false).ConfigureAwait(false);
+                var ssl = new SslStream(stream, false, userCertificateValidationCallback);
+                await ssl.AuthenticateAsServerAsync(serverCertificate, true, SslProtocols.Default | SslProtocols.Tls12, false).ConfigureAwait(false);
                 host._stream = ssl;
             }
             else

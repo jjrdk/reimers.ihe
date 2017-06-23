@@ -19,6 +19,7 @@
         private readonly int _port;
         private readonly Encoding _encoding;
         private readonly X509CertificateCollection _clientCertificates;
+        private readonly RemoteCertificateValidationCallback _userCertificateValidationCallback;
         private string _remoteAddress;
         private readonly TaskCompletionSource<Hl7Message> _completionSource = new TaskCompletionSource<Hl7Message>();
         private Stream _stream;
@@ -27,21 +28,23 @@
         private Task _readThread;
         private bool _sending;
 
-        private MllpClient(string address, int port, Encoding encoding, X509CertificateCollection clientCertificates)
+        private MllpClient(string address, int port, Encoding encoding, X509CertificateCollection clientCertificates, RemoteCertificateValidationCallback userCertificateValidationCallback)
         {
             _address = address;
             _port = port;
             _encoding = encoding;
             _clientCertificates = clientCertificates;
+            _userCertificateValidationCallback = userCertificateValidationCallback;
         }
 
         public static async Task<IHostConnection> Create(
             string address,
             int port,
             Encoding encoding = null,
-            X509CertificateCollection clientCertificates = null)
+            X509CertificateCollection clientCertificates = null,
+            RemoteCertificateValidationCallback userCertificateValidationCallback = null)
         {
-            var instance = new MllpClient(address, port, encoding ?? Encoding.ASCII, clientCertificates);
+            var instance = new MllpClient(address, port, encoding ?? Encoding.ASCII, clientCertificates, userCertificateValidationCallback);
             await instance.Setup().ConfigureAwait(false);
             return instance;
         }
@@ -75,9 +78,8 @@
             _stream = _tcpClient.GetStream();
             if (_clientCertificates != null)
             {
-                var ssl = new SslStream(_stream, false);
-                await ssl.AuthenticateAsClientAsync(_address, _clientCertificates,
-                    SslProtocols.Default | SslProtocols.Tls12, false).ConfigureAwait(false);
+                var ssl = new SslStream(_stream, false, _userCertificateValidationCallback);
+                await ssl.AuthenticateAsClientAsync(_address, _clientCertificates, SslProtocols.Default | SslProtocols.Tls12, false).ConfigureAwait(false);
                 _stream = ssl;
             }
             _readThread = ReadStream(_tokenSource.Token);
