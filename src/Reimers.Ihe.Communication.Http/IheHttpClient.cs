@@ -25,8 +25,7 @@
         {
         }
 
-        public async Task<Hl7Message> Send(string message,
-            CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Hl7Message> Send(string message, CancellationToken cancellationToken = default(CancellationToken))
         {
             var request = WebRequest.CreateHttp(_address);
             request.Method = "POST";
@@ -34,12 +33,12 @@
             request.MediaType = "application/hl7-v2";
             request.Accept = "application/hl7-v2, text/plain";
             request.AllowAutoRedirect = true;
-            using (var requestStream = request.GetRequestStream())
+            using (var requestStream = await request.GetRequestStreamAsync())
             {
                 var buffer = _encoding.GetBytes(message);
                 await requestStream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
             }
-            var response = request.GetResponse();
+            var response = await request.GetResponseAsync();
             using (var responseStream = response.GetResponseStream())
             {
                 using (var reader = new StreamReader(responseStream))
