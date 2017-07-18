@@ -1,6 +1,6 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IHl7MessageMiddleware.cs" company="Reimers.dk">
-//   Copyright © Reimers.dk 2017
+// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="IMessageLog.cs" company="Reimers.dk">
+//   Copyright � Reimers.dk 2017
 //   This source is subject to the MIT License.
 //   Please see https://opensource.org/licenses/MIT for details.
 //   All other rights reserved.
@@ -20,18 +20,18 @@
 
 namespace Reimers.Ihe.Communication
 {
-    using System.Threading.Tasks;
+	using System.Threading.Tasks;
 
-    /// <summary>
-    /// Defines the HL7 handling interface.
-    /// </summary>
-    public interface IHl7MessageMiddleware
-    {
-        /// <summary>
-        /// Handles the passed <see cref="Hl7Message"/> message.
-        /// </summary>
-        /// <param name="message">The <see cref="Hl7Message"/> to handle.</param>
-        /// <returns>An HL7 response as a <see cref="string"/>.</returns>
-        Task<string> Handle(Hl7Message message);
-    }
+	/// <summary>
+	/// Defines the public interface for an HL7 message log.
+	/// </summary>
+	public interface IMessageLog
+	{
+		/// <summary>
+		/// Writes the passed message to the log.
+		/// </summary>
+		/// <param name="msg"></param>
+		/// <returns></returns>
+		Task Write(string msg);
+	}
 }

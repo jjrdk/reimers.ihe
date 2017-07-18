@@ -18,6 +18,11 @@
   </PropertyGroup>
   <PropertyGroup>
     <DocumentationFile>bin\$(Configuration)\net461\Reimers.Ihe.Communication.xml</DocumentationFile>
+    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/jjrdk/reimers.ihe</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/jjrdk/reimers.ihe</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Reimers.Ihe.Communication\Reimers.Ihe.Communication.csproj" />

@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IheTransactionTests.cs" company="Reimers.dk">
+// <copyright file="NullLog.cs" company="Reimers.dk">
 //   Copyright © Reimers.dk 2017
 //   This source is subject to the MIT License.
 //   Please see https://opensource.org/licenses/MIT for details.
@@ -18,40 +18,30 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Reimers.Ihe.Communication.Tests
+namespace Reimers.Ihe.Communication
 {
-	using System;
-	using System.Net;
 	using System.Threading.Tasks;
-	using NHapi.Base.Parser;
-	using NHapi.Model.V251.Message;
-	using Xunit;
 
-	public class IheTransactionTests : IDisposable
+	/// <summary>
+	/// Defines a no-op logger.
+	/// </summary>
+	public class NullLog : IMessageLog
 	{
-		private readonly MllpServer _server;
+		private static readonly NullLog Instance = new NullLog();
 
-		private int _port = 2575; public IheTransactionTests()
+		/// <summary>
+		/// Gets an instance of a <see cref="NullLog"/>.
+		/// </summary>
+		/// <returns></returns>
+		public static NullLog Get()
 		{
-			_server = new MllpServer(new IPEndPoint(IPAddress.Loopback, _port), new TestMiddleware());
-			_server.Start();
-		}
-
-		[Fact]
-		public async Task WhenSendingMessageThenGetsAck()
-		{
-			var generator = DefaultMessageControlIdGenerator.Instance;
-			var connectionFactory = new DefaultMllpConnectionFactory(IPAddress.Loopback.ToString(), _port);
-			var client = new TestTransaction(connectionFactory.Get, new PipeParser());
-			var request = new QBP_Q11();
-			request.MSH.MessageControlID.Value = generator.NextId();
-			var response = await client.Send(request); Assert.NotNull(response);
+			return Instance;
 		}
 
 		/// <inheritdoc />
-		public void Dispose()
+		public Task Write(string msg)
 		{
-			_server?.Dispose();
+			return Task.CompletedTask;
 		}
 	}
 }

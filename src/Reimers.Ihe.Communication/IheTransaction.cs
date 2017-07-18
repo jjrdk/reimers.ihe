@@ -59,13 +59,13 @@ namespace Reimers.Ihe.Communication
         /// <returns>The response message as an asynchronous operation.</returns>
         public async Task<TReceive> Send(TSend message, CancellationToken cancellationToken = default(CancellationToken))
         {
+            message = await ConfigureHeaders(message).ConfigureAwait(false);
             var hl7 = _parser.Encode(message);
             using (var connection = await _connectionFactory().ConfigureAwait(false))
             {
                 var response = await connection.Send(hl7, cancellationToken).ConfigureAwait(false);
                 Trace.TraceInformation(response.Message);
-                var receive = (TReceive) _parser.Parse(response.Message);
-                return receive;
+                return (TReceive) _parser.Parse(response.Message);
             }
         }
 

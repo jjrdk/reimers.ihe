@@ -1,6 +1,6 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IHl7MessageMiddleware.cs" company="Reimers.dk">
-//   Copyright © Reimers.dk 2017
+// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="IIheTransactionHandler.cs" company="Reimers.dk">
+//   Copyright � Reimers.dk 2017
 //   This source is subject to the MIT License.
 //   Please see https://opensource.org/licenses/MIT for details.
 //   All other rights reserved.
@@ -21,17 +21,28 @@
 namespace Reimers.Ihe.Communication
 {
     using System.Threading.Tasks;
+    using NHapi.Base.Model;
 
     /// <summary>
-    /// Defines the HL7 handling interface.
+    /// Defines the interface for handling IHE transactions.
     /// </summary>
-    public interface IHl7MessageMiddleware
+    public interface IIheTransactionHandler
     {
         /// <summary>
-        /// Handles the passed <see cref="Hl7Message"/> message.
+        /// Gets the name of the message structure that is handled.
         /// </summary>
-        /// <param name="message">The <see cref="Hl7Message"/> to handle.</param>
-        /// <returns>An HL7 response as a <see cref="string"/>.</returns>
-        Task<string> Handle(Hl7Message message);
+        string Handles { get; }
+
+        /// <summary>
+        /// Gets the version of the message that is handled.
+        /// </summary>
+        string Version { get; }
+
+        /// <summary>
+        /// Handles the received message.
+        /// </summary>
+        /// <param name="message">The message to handle.</param>
+        /// <returns>The response message.</returns>
+        Task<IMessage> Handle(IMessage message);
     }
 }

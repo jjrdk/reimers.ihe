@@ -61,6 +61,10 @@ namespace Reimers.Ihe.Communication.Http
             var response = await request.GetResponseAsync();
             using (var responseStream = response.GetResponseStream())
             {
+                if (responseStream == null)
+                {
+                    return new Hl7Message(null, _address.ToString());
+                }
                 using (var reader = new StreamReader(responseStream))
                 {
                     var responseContent = await reader.ReadToEndAsync().ConfigureAwait(false);

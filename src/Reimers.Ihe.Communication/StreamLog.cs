@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IheTransactionTests.cs" company="Reimers.dk">
+// <copyright file="StreamLog.cs" company="Reimers.dk">
 //   Copyright © Reimers.dk 2017
 //   This source is subject to the MIT License.
 //   Please see https://opensource.org/licenses/MIT for details.
@@ -18,40 +18,33 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Reimers.Ihe.Communication.Tests
+namespace Reimers.Ihe.Communication
 {
-	using System;
-	using System.Net;
+	using System.IO;
+	using System.Text;
 	using System.Threading.Tasks;
-	using NHapi.Base.Parser;
-	using NHapi.Model.V251.Message;
-	using Xunit;
 
-	public class IheTransactionTests : IDisposable
+	/// <summary>
+	/// Defines a log implementation which outputs to a <see cref="Stream"/>.
+	/// </summary>
+	public class StreamLog : IMessageLog
 	{
-		private readonly MllpServer _server;
+		private readonly StreamWriter _output;
 
-		private int _port = 2575; public IheTransactionTests()
+		/// <summary>
+		/// Initializes a new instance of the <see cref="StreamLog"/> class.
+		/// </summary>
+		/// <param name="output"></param>
+		/// <param name="encoding"></param>
+		public StreamLog(Stream output, Encoding encoding = null)
 		{
-			_server = new MllpServer(new IPEndPoint(IPAddress.Loopback, _port), new TestMiddleware());
-			_server.Start();
-		}
-
-		[Fact]
-		public async Task WhenSendingMessageThenGetsAck()
-		{
-			var generator = DefaultMessageControlIdGenerator.Instance;
-			var connectionFactory = new DefaultMllpConnectionFactory(IPAddress.Loopback.ToString(), _port);
-			var client = new TestTransaction(connectionFactory.Get, new PipeParser());
-			var request = new QBP_Q11();
-			request.MSH.MessageControlID.Value = generator.NextId();
-			var response = await client.Send(request); Assert.NotNull(response);
+			_output = new StreamWriter(output, encoding ?? Encoding.UTF8);
 		}
 
 		/// <inheritdoc />
-		public void Dispose()
+		public Task Write(string msg)
 		{
-			_server?.Dispose();
+			return _output.WriteAsync(msg);
 		}
 	}
 }

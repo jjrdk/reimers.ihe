@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.13
+VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reimers.Ihe.Communication", "src\Reimers.Ihe.Communication\Reimers.Ihe.Communication.csproj", "{CB107B78-C76D-40E5-BE26-6EAE1AA85D6C}"
 EndProject
@@ -12,11 +12,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reimers.Ihe.Communication.Http", "src\Reimers.Ihe.Communication.Http\Reimers.Ihe.Communication.Http.csproj", "{1C5FD77E-066D-4713-BE24-9CF259B64EA3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reimers.Ihe.Communication.Http.Tests", "tests\Reimers.Ihe.Communication.Http.Tests\Reimers.Ihe.Communication.Http.Tests.csproj", "{D817A388-4AB8-41E0-9052-1B38B64B3857}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{87B3AC49-93FB-4E04-BB3F-2DA10846D360}"
-	ProjectSection(SolutionItems) = preProject
-		CreateTestCert.ps1 = CreateTestCert.ps1
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

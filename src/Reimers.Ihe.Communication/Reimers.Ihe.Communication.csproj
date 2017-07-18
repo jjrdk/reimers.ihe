@@ -3,7 +3,7 @@
   <PropertyGroup>
     <PackageId>Reimers.Ihe.Communication</PackageId>
     <Title>Reimers.Ihe.Communication</Title>
-    <Version>0.1.0</Version>
+    <Version>0.3.0</Version>
     <Authors>Jacob Reimers</Authors>
     <Owners>Jacob Reimers</Owners>
     <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
@@ -11,19 +11,33 @@
     <Copyright>Reimers.dk © 2016 - 2017</Copyright>
     <Company>Reimers.dk</Company>
     <TargetFramework>net461</TargetFramework>
-    <PackageTags>HL7 IHE</PackageTags>
+    <PackageTags>HL7 IHE MLLP</PackageTags>
     <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup>
     <DocumentationFile>bin\$(Configuration)\net461\Reimers.Ihe.Communication.xml</DocumentationFile>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <AssemblyName>reimers.ihe.communication</AssemblyName>
     <Product>Reimers IHE</Product>
+    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/jjrdk/reimers.ihe</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/jjrdk/reimers.ihe</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <AssemblyVersion>0.3.0.0</AssemblyVersion>
+    <FileVersion>0.3.0.0</FileVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <TreatSpecificWarningsAsErrors />
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="nHapi" Version="2.5.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
 
