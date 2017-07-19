@@ -28,7 +28,7 @@ namespace Reimers.Ihe.Communication
 	/// <remarks>The generated id is thread safe and unique within a single application.</remarks>
 	public class DefaultMessageControlIdGenerator : IMessageControlIdGenerator
 	{
-		private int _seed = 0;
+		private int _seed;
 		private static readonly object SyncRoot = new object();
 
 		private DefaultMessageControlIdGenerator()

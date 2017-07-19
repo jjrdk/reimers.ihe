@@ -31,21 +31,28 @@ namespace Reimers.Ihe.Communication.Tests
 	{
 		private readonly MllpServer _server;
 
-		private int _port = 2575; public IheTransactionTests()
+		private readonly int _port = 2575;
+
+		public IheTransactionTests()
 		{
-			_server = new MllpServer(new IPEndPoint(IPAddress.Loopback, _port), new TestMiddleware());
+			_server = new MllpServer(
+				new IPEndPoint(IPAddress.Loopback, _port),
+				NullLog.Get(),
+				new TestMiddleware());
 			_server.Start();
 		}
 
 		[Fact]
 		public async Task WhenSendingMessageThenGetsAck()
 		{
-			var generator = DefaultMessageControlIdGenerator.Instance;
-			var connectionFactory = new DefaultMllpConnectionFactory(IPAddress.Loopback.ToString(), _port);
+			IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
+			var connectionFactory =
+				new DefaultMllpConnectionFactory(IPAddress.Loopback.ToString(), _port);
 			var client = new TestTransaction(connectionFactory.Get, new PipeParser());
 			var request = new QBP_Q11();
 			request.MSH.MessageControlID.Value = generator.NextId();
-			var response = await client.Send(request); Assert.NotNull(response);
+			var response = await client.Send(request).ConfigureAwait(false);
+			Assert.NotNull(response);
 		}
 
 		/// <inheritdoc />

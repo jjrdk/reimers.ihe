@@ -20,46 +20,63 @@
 
 namespace Reimers.Ihe.Communication
 {
-    using System.Threading.Tasks;
-    using NHapi.Base.Model;
+	using System;
+	using System.Threading.Tasks;
+	using NHapi.Base.Model;
 
-    /// <summary>
-    /// Defines the abstract IHE transaction handler.
-    /// </summary>
-    /// <typeparam name="TMessage">The message type to handle.</typeparam>
-    /// <typeparam name="TResponse">The response message.</typeparam>
-    public abstract class IheTransactionHandler<TMessage, TResponse> : IIheTransactionHandler
-        where TMessage : IMessage
-        where TResponse : IMessage
-    {
-        /// <inheritdoc />
-        public abstract string Handles { get; }
+	/// <summary>
+	/// Defines the abstract IHE transaction handler.
+	/// </summary>
+	/// <typeparam name="TMessage">The message type to handle.</typeparam>
+	/// <typeparam name="TResponse">The response message.</typeparam>
+	public abstract class IheTransactionHandler<TMessage, TResponse> : IIheTransactionHandler
+		 where TMessage : class, IMessage
+		 where TResponse : class, IMessage
+	{
+		/// <inheritdoc />
+		public abstract string Handles { get; }
 
-        /// <inheritdoc />
-        public abstract string Version { get; }
+		/// <inheritdoc />
+		public abstract string Version { get; }
 
-        /// <inheritdoc />
-        public async Task<IMessage> Handle(IMessage message)
-        {
-            TResponse response = await HandleInternal((TMessage)message).ConfigureAwait(false);
-            return await ConfigureHeaders(response);
-        }
+		/// <inheritdoc />
+		public async Task<IMessage> Handle(IMessage message)
+		{
+			var msg = (TMessage)message;
+			var verified = await VerifyIncomingMessage(msg).ConfigureAwait(false);
+			var response = verified.Item2;
+			if (verified.Item1)
+			{
+				response = await HandleInternal(msg).ConfigureAwait(false);
+			}
+			return await ConfigureHeaders(response).ConfigureAwait(false);
+		}
 
-        /// <summary>
-        /// Defines a default message header configuration for the transaction.
-        /// </summary>
-        /// <param name="message">The message whose header should be configured.</param>
-        /// <returns>The message with configured header.</returns>
-        protected virtual Task<TResponse> ConfigureHeaders(TResponse message)
-        {
-            return Task.FromResult(message);
-        }
+		/// <summary>
+		/// Defines a default message header configuration for the transaction.
+		/// </summary>
+		/// <param name="message">The message whose header should be configured.</param>
+		/// <returns>The message with configured header.</returns>
+		protected virtual Task<TResponse> ConfigureHeaders(TResponse message)
+		{
+			return Task.FromResult(message);
+		}
 
-        /// <summary>
-        /// The concrete method for handling specific messages.
-        /// </summary>
-        /// <param name="message">The concrete message to handle.</param>
-        /// <returns>The response message as an asynchronous operation.</returns>
-        protected abstract Task<TResponse> HandleInternal(TMessage message);
-    }
+		/// <summary>
+		/// Verifies the contents of the incoming messages.
+		/// </summary>
+		/// <param name="message">The incoming message to verify.</param>
+		/// <returns>Returns <c>null</c> if </returns>
+		protected virtual Task<Tuple<bool, TResponse>> VerifyIncomingMessage(TMessage message)
+		{
+			return Task.FromResult(new Tuple<bool, TResponse>(true, null));
+		}
+
+		/// <summary>
+		/// The concrete method for handling specific messages.
+		/// </summary>
+		/// <param name="message">The concrete message to handle.</param>
+		/// <returns>The response message as an asynchronous operation.</returns>
+		protected abstract Task<TResponse> HandleInternal(TMessage message);
+	}
 }

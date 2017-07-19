@@ -53,12 +53,12 @@ namespace Reimers.Ihe.Communication.Http
             request.MediaType = "application/hl7-v2";
             request.Accept = "application/hl7-v2, text/plain";
             request.AllowAutoRedirect = true;
-            using (var requestStream = await request.GetRequestStreamAsync())
+            using (var requestStream = await request.GetRequestStreamAsync().ConfigureAwait(false))
             {
                 var buffer = _encoding.GetBytes(message);
                 await requestStream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
             }
-            var response = await request.GetResponseAsync();
+            var response = await request.GetResponseAsync().ConfigureAwait(false);
             using (var responseStream = response.GetResponseStream())
             {
                 if (responseStream == null)

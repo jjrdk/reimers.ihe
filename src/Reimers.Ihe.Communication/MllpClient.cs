@@ -88,7 +88,7 @@ namespace Reimers.Ihe.Communication
 			Array.Copy(bytes, 0, buffer, Constants.StartBlock.Length, bytes.Length);
 			Array.Copy(Constants.EndBlock, 0, buffer, Constants.StartBlock.Length + bytes.Length, Constants.EndBlock.Length);
 
-			await _messageLog.Write(message);
+			await _messageLog.Write(message).ConfigureAwait(false);
 			await _stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
 			return await _completionSource.Task.ConfigureAwait(false);
 		}
