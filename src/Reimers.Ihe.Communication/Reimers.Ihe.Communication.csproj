@@ -3,7 +3,7 @@
   <PropertyGroup>
     <PackageId>Reimers.Ihe.Communication</PackageId>
     <Title>Reimers.Ihe.Communication</Title>
-    <Version>0.3.0</Version>
+    <Version>1.0.0</Version>
     <Authors>Jacob Reimers</Authors>
     <Owners>Jacob Reimers</Owners>
     <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
@@ -12,10 +12,7 @@
     <Company>Reimers.dk</Company>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageTags>HL7 IHE MLLP</PackageTags>
-    <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
-  </PropertyGroup>
-
-  <PropertyGroup>
+    <PackageReleaseNotes>Update to net standard 2.0.</PackageReleaseNotes>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Reimers.Ihe.Communication.xml</DocumentationFile>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <AssemblyName>reimers.ihe.communication</AssemblyName>
@@ -24,8 +21,8 @@
     <PackageProjectUrl>https://github.com/jjrdk/reimers.ihe</PackageProjectUrl>
     <RepositoryUrl>https://github.com/jjrdk/reimers.ihe</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>0.3.0.0</AssemblyVersion>
-    <FileVersion>0.3.0.0</FileVersion>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

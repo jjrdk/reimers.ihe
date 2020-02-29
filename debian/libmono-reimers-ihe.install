@@ -1,3 +1,0 @@
-#! /usr/bin/dh-exec
-
-src/Reimers.Ihe.Http/bin/Release/reimers.ihe.http.dll /opt/mono/lib

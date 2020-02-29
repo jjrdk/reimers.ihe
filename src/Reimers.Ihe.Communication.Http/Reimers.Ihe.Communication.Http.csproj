@@ -10,11 +10,12 @@
     <Description>Classes to handle HTTP connections and IHE transactions.</Description>
     <Copyright>Reimers.dk © 2016 - 2017</Copyright>
     <PackageTags>HL7 IHE</PackageTags>
-    <AssemblyVersion>0.1.0.0</AssemblyVersion>
-    <FileVersion>0.1.0.0</FileVersion>
+    <PackageReleaseNotes>Update to net standard 2.0.</PackageReleaseNotes>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
     <AssemblyName>reimers.ihe.communication.http</AssemblyName>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>0.1.0</Version>
+    <Version>1.0.0</Version>
   </PropertyGroup>
   <PropertyGroup>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Reimers.Ihe.Communication.xml</DocumentationFile>

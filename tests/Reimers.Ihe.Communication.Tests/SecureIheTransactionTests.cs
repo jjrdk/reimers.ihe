@@ -48,7 +48,7 @@ namespace Reimers.Ihe.Communication.Tests
 			_server.Start();
 		}
 
-		private bool UserCertificateValidationCallback(
+		private static bool UserCertificateValidationCallback(
 			object sender,
 			X509Certificate certificate,
 			X509Chain chain,
