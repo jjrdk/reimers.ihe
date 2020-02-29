@@ -23,42 +23,69 @@ namespace Reimers.Ihe.Communication.Http.Tests
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using Microsoft.Owin.Hosting;
-    using Owin;
+    using System.Linq;
+    using System.Net;
+    using System.Net.Http;
+    using System.Net.Http.Headers;
+    using System.Text;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.TestHost;
+    using Microsoft.Net.Http.Headers;
+
     public class IheHttpServer : IDisposable
     {
-        private readonly IDisposable _server;
+        private readonly TestServer _server;
 
         public IheHttpServer(IEnumerable<string> urls, IHl7MessageMiddleware middleware)
         {
-            var startOptions = new StartOptions();
-            foreach (var url in urls)
-            {
-                startOptions.Urls.Add(url);
-            }
-
-            _server = WebApp.Start(startOptions, a =>
-            {
-                a.Run(async ctx =>
+            _server = new TestServer(new WebHostBuilder()
+                .UseUrls(urls.ToArray())
+                .Configure(a =>
                 {
-                    using (var reader = new StreamReader(ctx.Request.Body))
-                    {
-                        var hl7 = await reader.ReadToEndAsync().ConfigureAwait(false);
-                        var response = await middleware.Handle(new Hl7Message(hl7, ctx.Request.RemoteIpAddress))
-                            .ConfigureAwait(false); if (!string.IsNullOrWhiteSpace(response))
-                        {
-                            var owinResponse = ctx.Response;
-                            owinResponse.ContentType = "application/hl7-v2";
-                            owinResponse.StatusCode = 200;
-                            using (var writer = new StreamWriter(owinResponse.Body))
-                            {
-                                await writer.WriteAsync(response).ConfigureAwait(false);
-                            }
-                        }
-                    }
-                });
-            });
+                    a.Use(async (ctx, next) =>
+                       {
+                           using var reader = new StreamReader(ctx.Request.Body);
+                           var hl7 = await reader.ReadToEndAsync().ConfigureAwait(false);
+                           var response = await middleware.Handle(new Hl7Message(hl7, ctx.Connection.RemoteIpAddress?.ToString()))
+                               .ConfigureAwait(false);
+                           if (!string.IsNullOrWhiteSpace(response))
+                           {
+                               var owinResponse = ctx.Response;
+                               owinResponse.StatusCode = (int)HttpStatusCode.OK;
+                               var charset =
+                                   ctx.Request.ContentType?.Contains(';') == true
+                                       ? ctx.Request.ContentType
+                                           ?.Split(
+                                               ';',
+                                               StringSplitOptions
+                                                   .RemoveEmptyEntries)
+                                           .Last()
+                                           .Replace(
+                                               "charset=",
+                                               "",
+                                               StringComparison
+                                                   .InvariantCultureIgnoreCase)
+                                           .Trim()
+                                       : null;
+                               var encoding = string.IsNullOrWhiteSpace(charset)
+                                   ? Encoding.ASCII
+                                   : Encoding.GetEncoding(charset);
+
+                               owinResponse.ContentType = "application/hl7-v2; charset=" + encoding.WebName;
+                               await owinResponse.BodyWriter.WriteAsync(
+                                   encoding.GetBytes(response)
+                                       .AsMemory()).ConfigureAwait(false);
+                               await owinResponse.CompleteAsync().ConfigureAwait(false);
+                           }
+
+                           //await next().ConfigureAwait(false);
+                       });
+                }));
         }
+
+        public Func<HttpMessageHandler> CreateClientHandler => (() => _server.CreateHandler());
+
         public void Dispose()
         {
             _server.Dispose();

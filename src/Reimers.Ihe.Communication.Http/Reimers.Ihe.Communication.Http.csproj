@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Reimers.Ihe.Communication.Http</RootNamespace>
     <PackageId>Reimers.Ihe.Communication.Http</PackageId>
     <Title>Reimers.Ihe.Communication.Http</Title>
@@ -17,7 +17,7 @@
     <Version>0.1.0</Version>
   </PropertyGroup>
   <PropertyGroup>
-    <DocumentationFile>bin\$(Configuration)\net461\Reimers.Ihe.Communication.xml</DocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Reimers.Ihe.Communication.xml</DocumentationFile>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/jjrdk/reimers.ihe</PackageProjectUrl>
     <RepositoryUrl>https://github.com/jjrdk/reimers.ihe</RepositoryUrl>

@@ -32,17 +32,26 @@ namespace Reimers.Ihe.Communication.Http.Tests
 
         public IheTransactionTests()
         {
-            _server = new IheHttpServer(new[] { "http://localhost:8080" }, new TestMiddleware());
+            _server = new IheHttpServer(
+                new[] { "http://localhost:8080" },
+                new TestMiddleware());
         }
 
         [Fact]
         public async Task WhenSendingMessageThenGetsAck()
         {
-            var connectionFactory = new DefaultHttpConnectionFactory(new Uri("http://localhost:8080"));
-            var client = new TestTransaction(connectionFactory.Get, new PipeParser());
+            using var connectionFactory = new DefaultHttpConnectionFactory(
+                new Uri("http://localhost:8080"),
+                httpClientHandlerFactory: _server.CreateClientHandler);
+            var client = new TestTransaction(
+                connectionFactory.Get,
+                new PipeParser());
             var request = new QBP_Q11();
-            var response = await client.Send(request).ConfigureAwait(false); Assert.NotNull(response);
-        }        /// <inheritdoc />
+            var response = await client.Send(request).ConfigureAwait(false);
+            Assert.NotNull(response);
+        }
+
+        /// <inheritdoc />
         public void Dispose()
         {
             _server?.Dispose();

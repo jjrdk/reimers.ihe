@@ -22,8 +22,8 @@ namespace Reimers.Ihe.Communication.Http
 {
     using System;
     using System.IO;
-    using System.Net;
-    using System.Security.Cryptography.X509Certificates;
+    using System.Net.Http;
+    using System.Net.Http.Headers;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -31,46 +31,55 @@ namespace Reimers.Ihe.Communication.Http
     internal class IheHttpClient : IHostConnection
     {
         private readonly Uri _address;
+        private readonly HttpClient _httpClient;
         private readonly Encoding _encoding;
-        private readonly X509CertificateCollection _clientCertificates;
 
-        public IheHttpClient(Uri address, Encoding encoding = null, X509CertificateCollection clientCertificates = null)
+        public IheHttpClient(
+            Uri address,
+            HttpMessageHandler httpClientHandler,
+            Encoding encoding = null)
         {
             _address = address;
+            _httpClient = new HttpClient(httpClientHandler, false);
             _encoding = encoding ?? Encoding.ASCII;
-            _clientCertificates = clientCertificates ?? new X509Certificate2Collection();
         }
 
         public void Dispose()
         {
+            _httpClient.Dispose();
         }
 
-        public async Task<Hl7Message> Send(string message, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Hl7Message> Send(
+            string message,
+            CancellationToken cancellationToken = default)
         {
-            var request = WebRequest.CreateHttp(_address);
-            request.Method = "POST";
-            request.ClientCertificates = _clientCertificates;
-            request.MediaType = "application/hl7-v2";
-            request.Accept = "application/hl7-v2, text/plain";
-            request.AllowAutoRedirect = true;
-            using (var requestStream = await request.GetRequestStreamAsync().ConfigureAwait(false))
+            var content = new StreamContent(
+                new MemoryStream(_encoding.GetBytes(message)));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/hl7-v2")
             {
-                var buffer = _encoding.GetBytes(message);
-                await requestStream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
-            }
-            var response = await request.GetResponseAsync().ConfigureAwait(false);
-            using (var responseStream = response.GetResponseStream())
+                CharSet = _encoding.WebName
+            };
+            var request = new HttpRequestMessage
             {
-                if (responseStream == null)
-                {
-                    return new Hl7Message(null, _address.ToString());
-                }
-                using (var reader = new StreamReader(responseStream))
-                {
-                    var responseContent = await reader.ReadToEndAsync().ConfigureAwait(false);
-                    return new Hl7Message(responseContent, _address.ToString());
-                }
-            }
+                Method = HttpMethod.Post,
+                RequestUri = _address,
+                Content = content
+            };
+            request.Headers.Accept.Add(
+                new MediaTypeWithQualityHeaderValue(
+                    "application/hl7-v2"));
+            request.Headers.Accept.Add(
+                new MediaTypeWithQualityHeaderValue(
+                    "text/plain"));
+            var response = await _httpClient.SendAsync(
+                    request,
+                    cancellationToken)
+                .ConfigureAwait(false);
+         await   response.Content.LoadIntoBufferAsync().ConfigureAwait(false);
+            var responseContent = await response.Content.ReadAsStringAsync()
+                .ConfigureAwait(false);
+
+            return new Hl7Message(responseContent, _address.ToString());
         }
     }
 }

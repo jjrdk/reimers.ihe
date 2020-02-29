@@ -57,7 +57,7 @@ namespace Reimers.Ihe.Communication
         /// <param name="message">The message to send.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> for the transaction.</param>
         /// <returns>The response message as an asynchronous operation.</returns>
-        public async Task<TReceive> Send(TSend message, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<TReceive> Send(TSend message, CancellationToken cancellationToken = default)
         {
             message = await ConfigureHeaders(message).ConfigureAwait(false);
             var hl7 = _parser.Encode(message);
