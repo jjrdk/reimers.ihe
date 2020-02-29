@@ -16,14 +16,11 @@
     <AssemblyName>reimers.ihe.communication.http</AssemblyName>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Version>1.0.0</Version>
-  </PropertyGroup>
-  <PropertyGroup>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Reimers.Ihe.Communication.xml</DocumentationFile>
-    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/jjrdk/reimers.ihe</PackageProjectUrl>
     <RepositoryUrl>https://github.com/jjrdk/reimers.ihe</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Reimers.Ihe.Communication\Reimers.Ihe.Communication.csproj" />

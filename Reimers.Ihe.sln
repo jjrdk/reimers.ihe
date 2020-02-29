@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26430.14
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reimers.Ihe.Communication", "src\Reimers.Ihe.Communication\Reimers.Ihe.Communication.csproj", "{CB107B78-C76D-40E5-BE26-6EAE1AA85D6C}"
 EndProject
@@ -9,9 +9,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0745F841
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reimers.Ihe.Communication.Tests", "tests\Reimers.Ihe.Communication.Tests\Reimers.Ihe.Communication.Tests.csproj", "{B505145A-1443-4709-8582-295D746A69AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reimers.Ihe.Communication.Http", "src\Reimers.Ihe.Communication.Http\Reimers.Ihe.Communication.Http.csproj", "{1C5FD77E-066D-4713-BE24-9CF259B64EA3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reimers.Ihe.Communication.Http", "src\Reimers.Ihe.Communication.Http\Reimers.Ihe.Communication.Http.csproj", "{1C5FD77E-066D-4713-BE24-9CF259B64EA3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reimers.Ihe.Communication.Http.Tests", "tests\Reimers.Ihe.Communication.Http.Tests\Reimers.Ihe.Communication.Http.Tests.csproj", "{D817A388-4AB8-41E0-9052-1B38B64B3857}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{5D25CD1F-D78A-4D72-AE12-480EB536A40B}"
+	ProjectSection(SolutionItems) = preProject
+		build.cake = build.cake
+		build.ps1 = build.ps1
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,5 +48,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{B505145A-1443-4709-8582-295D746A69AF} = {0745F841-D37A-4897-B7CF-58AF124A66EC}
 		{D817A388-4AB8-41E0-9052-1B38B64B3857} = {0745F841-D37A-4897-B7CF-58AF124A66EC}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F4849527-06AA-4AD8-B7C7-7DEAD566A81F}
 	EndGlobalSection
 EndGlobal

@@ -17,7 +17,7 @@
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <AssemblyName>reimers.ihe.communication</AssemblyName>
     <Product>Reimers IHE</Product>
-    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/jjrdk/reimers.ihe</PackageProjectUrl>
     <RepositoryUrl>https://github.com/jjrdk/reimers.ihe</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
