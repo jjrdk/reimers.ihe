@@ -81,6 +81,7 @@ namespace Reimers.Ihe.Communication
         public void Dispose()
         {
             _tokenSource.Cancel();
+            _tokenSource.Dispose();
             _listener.Stop();
             _timer.Dispose();
             lock (_connections)

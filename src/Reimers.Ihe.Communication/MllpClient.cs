@@ -41,39 +41,65 @@ namespace Reimers.Ihe.Communication
         private readonly IMessageLog _messageLog;
         private readonly Encoding _encoding;
         private readonly X509CertificateCollection _clientCertificates;
-        private readonly RemoteCertificateValidationCallback _userCertificateValidationCallback;
+
+        private readonly RemoteCertificateValidationCallback
+            _userCertificateValidationCallback;
+
         private string _remoteAddress;
-        private readonly TaskCompletionSource<Hl7Message> _completionSource = new TaskCompletionSource<Hl7Message>();
+
+        private readonly TaskCompletionSource<Hl7Message> _completionSource =
+            new TaskCompletionSource<Hl7Message>();
+
         private Stream _stream;
-        private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
+
+        private readonly CancellationTokenSource _tokenSource =
+            new CancellationTokenSource();
+
         private TcpClient _tcpClient;
         private Task _readThread;
         private bool _sending;
 
-        private MllpClient(string address, int port, IMessageLog messageLog, Encoding encoding, X509CertificateCollection clientCertificates, RemoteCertificateValidationCallback userCertificateValidationCallback)
+        private MllpClient(
+            string address,
+            int port,
+            IMessageLog messageLog,
+            Encoding encoding,
+            X509CertificateCollection clientCertificates,
+            RemoteCertificateValidationCallback
+                userCertificateValidationCallback)
         {
             _address = address;
             _port = port;
             _messageLog = messageLog;
             _encoding = encoding;
             _clientCertificates = clientCertificates;
-            _userCertificateValidationCallback = userCertificateValidationCallback;
+            _userCertificateValidationCallback =
+                userCertificateValidationCallback;
         }
 
         public static async Task<IHostConnection> Create(
-             string address,
-             int port,
-             IMessageLog messageLog,
-             Encoding encoding,
-             X509CertificateCollection clientCertificates = null,
-             RemoteCertificateValidationCallback userCertificateValidationCallback = null)
+            string address,
+            int port,
+            IMessageLog messageLog,
+            Encoding encoding,
+            X509CertificateCollection clientCertificates = null,
+            RemoteCertificateValidationCallback
+                userCertificateValidationCallback = null)
         {
-            var instance = new MllpClient(address, port, messageLog, encoding, clientCertificates, userCertificateValidationCallback);
+            var instance = new MllpClient(
+                address,
+                port,
+                messageLog,
+                encoding,
+                clientCertificates,
+                userCertificateValidationCallback);
             await instance.Setup().ConfigureAwait(false);
             return instance;
         }
 
-        public async Task<Hl7Message> Send(string message, CancellationToken cancellationToken = default)
+        public async Task<Hl7Message> Send(
+            string message,
+            CancellationToken cancellationToken = default)
         {
             lock (_stream)
             {
@@ -81,17 +107,37 @@ namespace Reimers.Ihe.Communication
                 {
                     throw new InvalidOperationException("Transaction ongoing");
                 }
+
                 _sending = true;
             }
+
             var bytes = _encoding.GetBytes(message);
-            var length = bytes.Length + Constants.StartBlock.Length + Constants.EndBlock.Length;
+            var length = bytes.Length
+                         + Constants.StartBlock.Length
+                         + Constants.EndBlock.Length;
             var buffer = ArrayPool<byte>.Shared.Rent(length);
-            Array.Copy(Constants.StartBlock, 0, buffer, 0, Constants.StartBlock.Length);
-            Array.Copy(bytes, 0, buffer, Constants.StartBlock.Length, bytes.Length);
-            Array.Copy(Constants.EndBlock, 0, buffer, Constants.StartBlock.Length + bytes.Length, Constants.EndBlock.Length);
+            Array.Copy(
+                Constants.StartBlock,
+                0,
+                buffer,
+                0,
+                Constants.StartBlock.Length);
+            Array.Copy(
+                bytes,
+                0,
+                buffer,
+                Constants.StartBlock.Length,
+                bytes.Length);
+            Array.Copy(
+                Constants.EndBlock,
+                0,
+                buffer,
+                Constants.StartBlock.Length + bytes.Length,
+                Constants.EndBlock.Length);
 
             await _messageLog.Write(message).ConfigureAwait(false);
-            await _stream.WriteAsync(buffer, 0, length, cancellationToken).ConfigureAwait(false);
+            await _stream.WriteAsync(buffer, 0, length, cancellationToken)
+                .ConfigureAwait(false);
             ArrayPool<byte>.Shared.Return(buffer);
             return await _completionSource.Task.ConfigureAwait(false);
         }
@@ -110,8 +156,7 @@ namespace Reimers.Ihe.Communication
                 await ssl.AuthenticateAsClientAsync(
                         _address,
                         _clientCertificates,
-                        SslProtocols.Tls11
-                        | SslProtocols.Tls12,
+                        SslProtocols.Tls11 | SslProtocols.Tls12,
                         false)
                     .ConfigureAwait(false);
                 _stream = ssl;
@@ -125,6 +170,7 @@ namespace Reimers.Ihe.Communication
             _tcpClient.Close();
             _tcpClient.Dispose();
             _tokenSource.Cancel();
+            _tokenSource.Dispose();
             _stream.Close();
             _stream.Dispose();
         }
@@ -141,7 +187,8 @@ namespace Reimers.Ihe.Communication
                     var current = (byte)_stream.ReadByte();
 
                     cancellationToken.ThrowIfCancellationRequested();
-                    if (Constants.EndBlock.SequenceEqual(new[] { previous, current }))
+                    if (Constants.EndBlock.SequenceEqual(
+                        new[] { previous, current }))
                     {
                         messageBuilder.RemoveAt(messageBuilder.Count - 1);
                         var s = _encoding.GetString(messageBuilder.ToArray());
@@ -149,11 +196,14 @@ namespace Reimers.Ihe.Communication
                         _completionSource.SetResult(message);
                         break;
                     }
+
                     if (previous == 0 && current == 11)
                     {
                         if (messageBuilder.Count > 0)
                         {
-                            throw new Exception($"Unexpected character: {current:x2}");
+                            _completionSource.SetException(
+                                new Exception(
+                                    $"Unexpected character: {current:x2}"));
                         }
                     }
                     else

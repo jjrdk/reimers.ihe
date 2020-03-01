@@ -105,13 +105,6 @@ namespace Reimers.Ihe.Communication
             _client.Dispose();
             _stream?.Close();
             _stream?.Dispose();
-            try
-            {
-                _readThread.Dispose();
-            }
-            catch
-            {
-            }
         }
 
         private async Task ReadStream(CancellationToken cancellationToken)
