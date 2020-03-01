@@ -21,6 +21,8 @@
 namespace Reimers.Ihe.Communication.Http.Tests
 {
     using System;
+    using System.Collections.Generic;
+    using System.Text;
     using System.Threading.Tasks;
     using NHapi.Base.Parser;
     using NHapi.Model.V251.Message;
@@ -37,11 +39,13 @@ namespace Reimers.Ihe.Communication.Http.Tests
                 new TestMiddleware());
         }
 
-        [Fact]
-        public async Task WhenSendingMessageThenGetsAck()
+        [Theory]
+        [MemberData(nameof(GetEncodings))]
+        public async Task WhenSendingMessageThenGetsAck(Encoding encoding)
         {
             using var connectionFactory = new DefaultHttpConnectionFactory(
                 new Uri("http://localhost:8080"),
+                encoding,
                 httpClientHandlerFactory: _server.CreateClientHandler);
             var client = new TestTransaction(
                 connectionFactory.Get,
@@ -49,6 +53,20 @@ namespace Reimers.Ihe.Communication.Http.Tests
             var request = new QBP_Q11();
             var response = await client.Send(request).ConfigureAwait(false);
             Assert.NotNull(response);
+        }
+
+        public static IEnumerable<object[]> GetEncodings()
+        {
+            return new[]
+            {
+                new[] {Encoding.ASCII},
+                new[] {Encoding.BigEndianUnicode},
+                new[] {Encoding.Default},
+                new[] {Encoding.UTF32},
+                new[] {Encoding.UTF7},
+                new[] {Encoding.UTF8},
+                new[] {Encoding.Unicode}
+            };
         }
 
         /// <inheritdoc />

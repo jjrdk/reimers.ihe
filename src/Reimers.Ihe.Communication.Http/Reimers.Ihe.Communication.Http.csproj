@@ -1,27 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Reimers.Ihe.Communication.Http</RootNamespace>
     <PackageId>Reimers.Ihe.Communication.Http</PackageId>
     <Title>Reimers.Ihe.Communication.Http</Title>
-    <Authors>Jacob Reimers</Authors>
-    <Company>Reimers.dk</Company>
-    <Product>Reimers IHE Communication</Product>
     <Description>Classes to handle HTTP connections and IHE transactions.</Description>
-    <Copyright>Reimers.dk © 2016 - 2017</Copyright>
     <PackageTags>HL7 IHE</PackageTags>
     <PackageReleaseNotes>Update to net standard 2.0.</PackageReleaseNotes>
-    <AssemblyVersion>1.0.0</AssemblyVersion>
-    <FileVersion>1.0.0</FileVersion>
     <AssemblyName>reimers.ihe.communication.http</AssemblyName>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.0.0</Version>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Reimers.Ihe.Communication.xml</DocumentationFile>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/jjrdk/reimers.ihe</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/jjrdk/reimers.ihe</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
+  <Import Project="../../shared.proj"/>
   <ItemGroup>
     <ProjectReference Include="..\Reimers.Ihe.Communication\Reimers.Ihe.Communication.csproj" />
   </ItemGroup>

@@ -37,6 +37,6 @@ namespace Reimers.Ihe.Communication
         /// <returns>An <see cref="Hl7Message"/> containing the response and source address.</returns>
         Task<Hl7Message> Send(
             string message,
-            CancellationToken cancellationToken = default(CancellationToken));
+            CancellationToken cancellationToken = default);
     }
 }

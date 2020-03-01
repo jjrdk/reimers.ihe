@@ -20,6 +20,7 @@
 
 namespace Reimers.Ihe.Communication
 {
+    using System.Threading;
     using System.Threading.Tasks;
     using NHapi.Base.Model;
 
@@ -42,7 +43,8 @@ namespace Reimers.Ihe.Communication
         /// Handles the received message.
         /// </summary>
         /// <param name="message">The message to handle.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> for the async operation.</param>
         /// <returns>The response message.</returns>
-        Task<IMessage> Handle(IMessage message);
+        Task<IMessage> Handle(IMessage message, CancellationToken cancellationToken = default);
     }
 }

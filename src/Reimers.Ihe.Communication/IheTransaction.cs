@@ -61,12 +61,12 @@ namespace Reimers.Ihe.Communication
         {
             message = await ConfigureHeaders(message).ConfigureAwait(false);
             var hl7 = _parser.Encode(message);
-            using (var connection = await _connectionFactory().ConfigureAwait(false))
-            {
-                var response = await connection.Send(hl7, cancellationToken).ConfigureAwait(false);
-                Trace.TraceInformation(response.Message);
-                return (TReceive) _parser.Parse(response.Message);
-            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            using var connection = await _connectionFactory().ConfigureAwait(false);
+            var response = await connection.Send(hl7, cancellationToken).ConfigureAwait(false);
+            Trace.TraceInformation(response.Message);
+            return (TReceive)_parser.Parse(response.Message);
         }
 
         /// <summary>

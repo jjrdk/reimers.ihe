@@ -20,45 +20,68 @@
 
 namespace Reimers.Ihe.Communication.Tests
 {
-	using System;
-	using System.Net;
-	using System.Threading.Tasks;
-	using NHapi.Base.Parser;
-	using NHapi.Model.V251.Message;
-	using Xunit;
+    using System;
+    using System.Linq;
+    using System.Net;
+    using System.Threading.Tasks;
+    using NHapi.Base.Parser;
+    using NHapi.Model.V251.Message;
+    using Xunit;
 
-	public class IheTransactionTests : IDisposable
-	{
-		private readonly MllpServer _server;
+    public class IheTransactionTests : IDisposable
+    {
+        private readonly MllpServer _server;
+        private const int Port = 2575;
 
-		private readonly int _port = 2575;
+        public IheTransactionTests()
+        {
+            _server = new MllpServer(
+                new IPEndPoint(IPAddress.Loopback, Port),
+                NullLog.Get(),
+                new TestMiddleware());
+            _server.Start();
+        }
 
-		public IheTransactionTests()
-		{
-			_server = new MllpServer(
-				new IPEndPoint(IPAddress.Loopback, _port),
-				NullLog.Get(),
-				new TestMiddleware());
-			_server.Start();
-		}
+        [Fact]
+        public async Task WhenSendingMessageThenGetsAck()
+        {
+            IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
+            var connectionFactory =
+                new DefaultMllpConnectionFactory(IPAddress.Loopback.ToString(), Port);
+            var client = new TestTransaction(connectionFactory.Get, new PipeParser());
+            var request = new QBP_Q11();
+            request.MSH.MessageControlID.Value = generator.NextId();
+            var response = await client.Send(request).ConfigureAwait(false);
+            Assert.NotNull(response);
+        }
 
-		[Fact]
-		public async Task WhenSendingMessageThenGetsAck()
-		{
-			IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
-			var connectionFactory =
-				new DefaultMllpConnectionFactory(IPAddress.Loopback.ToString(), _port);
-			var client = new TestTransaction(connectionFactory.Get, new PipeParser());
-			var request = new QBP_Q11();
-			request.MSH.MessageControlID.Value = generator.NextId();
-			var response = await client.Send(request).ConfigureAwait(false);
-			Assert.NotNull(response);
-		}
+        [Fact]
+        public async Task WhenSendingMultipleParallelMessageThenGetsAckForAll()
+        {
+            IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
+            var connectionFactory =
+                new DefaultMllpConnectionFactory(IPAddress.Loopback.ToString(), Port);
+            var client = new TestTransaction(connectionFactory.Get, new PipeParser());
+            var request = new QBP_Q11();
+            var tasks = Enumerable.Repeat(false, 1000)
+                    .Select(
+                        async _ =>
+                        {
+                            request.MSH.MessageControlID.Value = generator.NextId();
+                            var response =
+                                await client.Send(request).ConfigureAwait(false);
+                            return response != null;
+                        });
 
-		/// <inheritdoc />
-		public void Dispose()
-		{
-			_server?.Dispose();
-		}
-	}
+            var results = await Task.WhenAll(tasks).ConfigureAwait(false);
+
+            Assert.All(results, Assert.True);
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            _server?.Dispose();
+        }
+    }
 }

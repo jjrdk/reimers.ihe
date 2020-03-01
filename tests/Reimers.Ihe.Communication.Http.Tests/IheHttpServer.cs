@@ -26,12 +26,10 @@ namespace Reimers.Ihe.Communication.Http.Tests
     using System.Linq;
     using System.Net;
     using System.Net.Http;
-    using System.Net.Http.Headers;
     using System.Text;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
-    using Microsoft.Net.Http.Headers;
 
     public class IheHttpServer : IDisposable
     {
@@ -78,8 +76,6 @@ namespace Reimers.Ihe.Communication.Http.Tests
                                        .AsMemory()).ConfigureAwait(false);
                                await owinResponse.CompleteAsync().ConfigureAwait(false);
                            }
-
-                           //await next().ConfigureAwait(false);
                        });
                 }));
         }

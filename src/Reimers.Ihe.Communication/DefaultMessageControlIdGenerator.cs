@@ -20,38 +20,39 @@
 
 namespace Reimers.Ihe.Communication
 {
-	using System;
+    using System;
+    using System.Threading;
 
-	/// <summary>
-	/// Defines the default message control id generator.
-	/// </summary>
-	/// <remarks>The generated id is thread safe and unique within a single application.</remarks>
-	public class DefaultMessageControlIdGenerator : IMessageControlIdGenerator
-	{
-		private int _seed;
-		private static readonly object SyncRoot = new object();
+    /// <summary>
+    /// Defines the default message control id generator.
+    /// </summary>
+    /// <remarks>The generated id is thread safe and unique within a single application.</remarks>
+    public class DefaultMessageControlIdGenerator : IMessageControlIdGenerator
+    {
+        private int _seed;
+        private static readonly object SyncRoot = new object();
 
-		private DefaultMessageControlIdGenerator()
-		{
-		}
+        private DefaultMessageControlIdGenerator()
+        {
+        }
 
-		/// <summary>
-		/// Gets the singleton instanceof the id generator.
-		/// </summary>
-		public static DefaultMessageControlIdGenerator Instance { get; } = new DefaultMessageControlIdGenerator();
+        /// <summary>
+        /// Gets the singleton instance of the id generator.
+        /// </summary>
+        public static DefaultMessageControlIdGenerator Instance { get; } = new DefaultMessageControlIdGenerator();
 
-		/// <inheritdoc />
-		public string NextId()
-		{
-			lock (SyncRoot)
-			{
-				var counter = ++_seed;
-				if (counter >= 999999)
-				{
-					_seed = 0;
-				}
-				return DateTime.UtcNow.ToString("yyyyMMddHHmmss") + counter.ToString("D6");
-			}
-		}
-	}
+        /// <inheritdoc />
+        public string NextId()
+        {
+            lock (SyncRoot)
+            {
+                var counter = Interlocked.Increment(ref _seed);
+                if (counter >= 999999)
+                {
+                    _seed = 0;
+                }
+                return $"{DateTime.UtcNow:yyyyMMddHHmmss}{counter:D6}";
+            }
+        }
+    }
 }

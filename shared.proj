@@ -1,0 +1,23 @@
+<Project>
+  <PropertyGroup>
+    <Version>1.0.0</Version>
+    <Authors>Jacob Reimers</Authors>
+    <Owners>Jacob Reimers</Owners>
+    <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
+    <Copyright>Reimers.dk © 2016 - 2020</Copyright>
+    <Company>Reimers.dk</Company>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <Product>Reimers IHE</Product>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/jjrdk/reimers.ihe</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/jjrdk/reimers.ihe</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <WarningsNotAsErrors>618,1701</WarningsNotAsErrors>
+  </PropertyGroup>
+</Project>

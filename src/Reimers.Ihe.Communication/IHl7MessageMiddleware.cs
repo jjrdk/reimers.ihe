@@ -20,6 +20,7 @@
 
 namespace Reimers.Ihe.Communication
 {
+    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -31,7 +32,8 @@ namespace Reimers.Ihe.Communication
         /// Handles the passed <see cref="Hl7Message"/> message.
         /// </summary>
         /// <param name="message">The <see cref="Hl7Message"/> to handle.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> for the async operation.</param>
         /// <returns>An HL7 response as a <see cref="string"/>.</returns>
-        Task<string> Handle(Hl7Message message);
+        Task<string> Handle(Hl7Message message, CancellationToken cancellationToken = default);
     }
 }
