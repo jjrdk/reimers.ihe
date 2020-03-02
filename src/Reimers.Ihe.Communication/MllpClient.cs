@@ -34,7 +34,10 @@ namespace Reimers.Ihe.Communication
     using System.Threading;
     using System.Threading.Tasks;
 
-    internal class MllpClient : IHostConnection
+    /// <summary>
+    /// Defines the <see cref="MllpClient"/> class.
+    /// </summary>
+    public class MllpClient : IHostConnection
     {
         private readonly string _address;
         private readonly int _port;
@@ -77,6 +80,16 @@ namespace Reimers.Ihe.Communication
                 userCertificateValidationCallback;
         }
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="MllpClient"/> class.
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="port"></param>
+        /// <param name="messageLog"></param>
+        /// <param name="encoding"></param>
+        /// <param name="clientCertificates"></param>
+        /// <param name="userCertificateValidationCallback"></param>
+        /// <returns></returns>
         public static async Task<IHostConnection> Create(
             string address,
             int port,
@@ -97,6 +110,12 @@ namespace Reimers.Ihe.Communication
             return instance;
         }
 
+        /// <summary>
+        /// Sends the HL7 message to the server.
+        /// </summary>
+        /// <param name="message">The message to send.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> for the async operation.</param>
+        /// <returns></returns>
         public async Task<Hl7Message> Send(
             string message,
             CancellationToken cancellationToken = default)
@@ -165,6 +184,7 @@ namespace Reimers.Ihe.Communication
             _readThread = ReadStream(_tokenSource.Token);
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             _tcpClient.Close();

@@ -99,6 +99,7 @@ namespace Reimers.Ihe.Communication
             return host;
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             _client.Close();
