@@ -40,11 +40,17 @@ namespace Reimers.Ihe.Communication
         private readonly IHl7MessageMiddleware _middleware;
         private readonly Encoding _encoding;
         private readonly X509Certificate _serverCertificate;
-        private readonly RemoteCertificateValidationCallback _userCertificateValidationCallback;
+
+        private readonly RemoteCertificateValidationCallback
+            _userCertificateValidationCallback;
+
         private readonly TcpListener _listener;
         private readonly List<MllpHost> _connections = new List<MllpHost>();
         private readonly Timer _timer;
-        private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
+
+        private readonly CancellationTokenSource _tokenSource =
+            new CancellationTokenSource();
+
         private Task _readTask;
 
         /// <summary>
@@ -56,16 +62,27 @@ namespace Reimers.Ihe.Communication
         /// <param name="encoding">The <see cref="Encoding"/> to use for network transfers.</param>
         /// <param name="serverCertificate">The certificates to use for secure connections.</param>
         /// <param name="userCertificateValidationCallback">Optional certificate validation callback.</param>
-        public MllpServer(IPEndPoint endPoint, IMessageLog messageLog, IHl7MessageMiddleware middleware, Encoding encoding = null,
-              X509Certificate serverCertificate = null, RemoteCertificateValidationCallback userCertificateValidationCallback = null)
+        public MllpServer(
+            IPEndPoint endPoint,
+            IMessageLog messageLog,
+            IHl7MessageMiddleware middleware,
+            Encoding encoding = null,
+            X509Certificate serverCertificate = null,
+            RemoteCertificateValidationCallback
+                userCertificateValidationCallback = null)
         {
             _messageLog = messageLog;
             _middleware = middleware;
             _encoding = encoding;
             _serverCertificate = serverCertificate;
-            _userCertificateValidationCallback = userCertificateValidationCallback;
+            _userCertificateValidationCallback =
+                userCertificateValidationCallback;
             _listener = new TcpListener(endPoint);
-            _timer = new Timer(CleanConnections, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
+            _timer = new Timer(
+                CleanConnections,
+                null,
+                TimeSpan.FromSeconds(5),
+                TimeSpan.FromSeconds(5));
         }
 
         /// <summary>
@@ -90,13 +107,14 @@ namespace Reimers.Ihe.Communication
                 {
                     connection.Dispose();
                 }
+
                 _connections.Clear();
             }
         }
 
         private async Task Read()
         {
-            while (!_tokenSource.Token.IsCancellationRequested)
+            while (!_tokenSource.IsCancellationRequested)
             {
                 try
                 {
@@ -133,6 +151,7 @@ namespace Reimers.Ihe.Communication
                     _connections.Remove(conn);
                 }
             }
+
             foreach (var host in temp)
             {
                 host.Dispose();
