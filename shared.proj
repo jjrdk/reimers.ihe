@@ -1,10 +1,10 @@
 <Project>
   <PropertyGroup>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Authors>Jacob Reimers</Authors>
     <Owners>Jacob Reimers</Owners>
     <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
-    <Copyright>Reimers.dk © 2016 - 2020</Copyright>
+    <Copyright>Reimers.dk ï¿½ 2016 - 2020</Copyright>
     <Company>Reimers.dk</Company>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
@@ -13,8 +13,8 @@
     <PackageProjectUrl>https://github.com/jjrdk/reimers.ihe</PackageProjectUrl>
     <RepositoryUrl>https://github.com/jjrdk/reimers.ihe</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>1.0.0</AssemblyVersion>
-    <FileVersion>1.0.0</FileVersion>
+    <AssemblyVersion>1.1.0</AssemblyVersion>
+    <FileVersion>1.1.0</FileVersion>
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningsAsErrors />

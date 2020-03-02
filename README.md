@@ -1,5 +1,6 @@
 # Reimers IHE Communication
 
+![Nuget](https://badgen.net/nuget/v/reimers.ihe.communication)
 ![Build](https://github.com/jjrdk/reimers.ihe/workflows/.NET%20Core%20Build/badge.svg)
 
 ## Description
