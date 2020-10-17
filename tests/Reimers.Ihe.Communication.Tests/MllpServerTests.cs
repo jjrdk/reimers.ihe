@@ -10,17 +10,16 @@
 
     public class MllpServerTests : IDisposable
     {
-        private MllpServer _server;
-        private PipeParser _parser;
+        private readonly MllpServer _server;
 
         public MllpServerTests()
         {
-            _parser = new PipeParser();
             _server = new MllpServer(
                 new IPEndPoint(IPAddress.IPv6Loopback, 2575),
                 NullLog.Get(),
                 new DefaultHl7MessageMiddleware(
                     handlers: new TestTransactionHandler()),
+                new PipeParser(),
                 Encoding.ASCII);
             _server.Start();
         }
@@ -33,19 +32,16 @@
                     address,
                     2575,
                     NullLog.Get(),
+                    new PipeParser(),
                     Encoding.ASCII)
                 .ConfigureAwait(false);
             var adt = new ADT_A01();
             adt.MSH.MessageControlID.Value =
                 DefaultMessageControlIdGenerator.Instance.NextId();
 
-            var msg = _parser.Encode(adt);
+            var response = await client.Send(adt).ConfigureAwait(false);
 
-            var response = await client.Send(msg).ConfigureAwait(false);
-
-            var ack = _parser.Parse(response.Message);
-
-            Assert.NotNull(ack);
+            Assert.NotNull(response.Message);
         }
 
         /// <inheritdoc />

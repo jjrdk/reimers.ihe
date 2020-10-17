@@ -37,17 +37,14 @@ namespace Reimers.Ihe.Communication
         where TReceive : IMessage
     {
         private readonly Func<Task<IHostConnection>> _connectionFactory;
-        private readonly PipeParser _parser;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IheTransaction{TSend,TReceive}"/> class.
         /// </summary>
         /// <param name="connectionFactory"></param>
-        /// <param name="parser"></param>
-        protected IheTransaction(Func<Task<IHostConnection>> connectionFactory, PipeParser parser)
+        protected IheTransaction(Func<Task<IHostConnection>> connectionFactory)
         {
             _connectionFactory = connectionFactory;
-            _parser = parser;
         }
 
         /// <summary>
@@ -60,13 +57,11 @@ namespace Reimers.Ihe.Communication
         public async Task<TReceive> Send(TSend message, CancellationToken cancellationToken = default)
         {
             message = await ConfigureHeaders(message).ConfigureAwait(false);
-            var hl7 = _parser.Encode(message);
 
             cancellationToken.ThrowIfCancellationRequested();
             using var connection = await _connectionFactory().ConfigureAwait(false);
-            var response = await connection.Send(hl7, cancellationToken).ConfigureAwait(false);
-            Trace.TraceInformation(response.Message);
-            return (TReceive)_parser.Parse(response.Message);
+            var response = await connection.Send(message, cancellationToken).ConfigureAwait(false);
+            return (TReceive)response.Message;
         }
 
         /// <summary>

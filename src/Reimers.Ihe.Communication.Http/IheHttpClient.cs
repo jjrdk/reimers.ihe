@@ -27,19 +27,24 @@ namespace Reimers.Ihe.Communication.Http
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using NHapi.Base.Model;
+    using NHapi.Base.Parser;
 
     internal class IheHttpClient : IHostConnection
     {
         private readonly Uri _address;
+        private readonly PipeParser _parser;
         private readonly HttpClient _httpClient;
         private readonly Encoding _encoding;
 
         public IheHttpClient(
             Uri address,
             HttpMessageHandler httpClientHandler,
-            Encoding encoding = null)
+            PipeParser? parser = null,
+            Encoding? encoding = null)
         {
             _address = address;
+            _parser = parser ?? new PipeParser();
             _httpClient = new HttpClient(httpClientHandler, false);
             _encoding = encoding ?? Encoding.ASCII;
         }
@@ -49,12 +54,14 @@ namespace Reimers.Ihe.Communication.Http
             _httpClient.Dispose();
         }
 
-        public async Task<Hl7Message> Send(
-            string message,
+        public async Task<Hl7Message> Send<TMessage>(
+            TMessage message,
             CancellationToken cancellationToken = default)
+        where TMessage : IMessage
         {
+            var hl7 = _parser.Encode(message);
             var content = new StreamContent(
-                new MemoryStream(_encoding.GetBytes(message)));
+                new MemoryStream(_encoding.GetBytes(hl7)));
             content.Headers.ContentType = new MediaTypeHeaderValue("application/hl7-v2")
             {
                 CharSet = _encoding.WebName
@@ -75,11 +82,12 @@ namespace Reimers.Ihe.Communication.Http
                     request,
                     cancellationToken)
                 .ConfigureAwait(false);
-         await   response.Content.LoadIntoBufferAsync().ConfigureAwait(false);
+            await response.Content.LoadIntoBufferAsync().ConfigureAwait(false);
             var responseContent = await response.Content.ReadAsStringAsync()
                 .ConfigureAwait(false);
 
-            return new Hl7Message(responseContent, _address.ToString());
+            var msg = _parser.Parse(responseContent);
+            return new Hl7Message(msg, _address.ToString());
         }
     }
 }

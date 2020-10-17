@@ -1,31 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <PackageId>Reimers.Ihe.Communication</PackageId>
-    <Title>Reimers.Ihe.Communication</Title>
-    <Description>Classes to handle MLLP connections and IHE transactions.</Description>
-    <PackageTags>HL7 IHE MLLP</PackageTags>
-    <PackageReleaseNotes>Update to net standard 2.0.</PackageReleaseNotes>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Reimers.Ihe.Communication.xml</DocumentationFile>
-    <AssemblyName>reimers.ihe.communication</AssemblyName>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-  </PropertyGroup>
+	<PropertyGroup>
+		<PackageId>Reimers.Ihe.Communication</PackageId>
+		<Title>Reimers.Ihe.Communication</Title>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<Description>Classes to handle MLLP connections and IHE transactions.</Description>
+		<PackageTags>HL7 IHE MLLP</PackageTags>
+		<PackageReleaseNotes>Update to net standard 2.0.</PackageReleaseNotes>
+		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Reimers.Ihe.Communication.xml</DocumentationFile>
+		<AssemblyName>reimers.ihe.communication</AssemblyName>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+	</ItemGroup>
 
-  <Import Project="../../shared.proj" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-    <TreatSpecificWarningsAsErrors />
-  </PropertyGroup>
+	<Import Project="../../shared.proj" />
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+		<TreatSpecificWarningsAsErrors />
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NHapi.Base.clone" Version="0.1.0" />
-    <PackageReference Include="System.Buffers" Version="4.5.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="NHapi.Base.clone" Version="0.1.0" />
+		<PackageReference Include="System.Buffers" Version="4.5.1" />
+	</ItemGroup>
 
 </Project>

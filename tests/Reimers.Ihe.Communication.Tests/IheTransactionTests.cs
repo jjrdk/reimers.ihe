@@ -48,7 +48,7 @@ namespace Reimers.Ihe.Communication.Tests
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
             var connectionFactory =
                 new DefaultMllpConnectionFactory(IPAddress.Loopback.ToString(), Port);
-            var client = new TestTransaction(connectionFactory.Get, new PipeParser());
+            var client = new TestTransaction(connectionFactory.Get);
             var request = new QBP_Q11();
             request.MSH.MessageControlID.Value = generator.NextId();
             var response = await client.Send(request).ConfigureAwait(false);
@@ -61,9 +61,9 @@ namespace Reimers.Ihe.Communication.Tests
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
             var connectionFactory =
                 new DefaultMllpConnectionFactory(IPAddress.Loopback.ToString(), Port);
-            var client = new TestTransaction(connectionFactory.Get, new PipeParser());
+            var client = new TestTransaction(connectionFactory.Get);
             var request = new QBP_Q11();
-            var tasks = Enumerable.Repeat(false, 1000)
+            var tasks = Enumerable.Repeat(false, 10)
                     .Select(
                         async _ =>
                         {
@@ -71,6 +71,30 @@ namespace Reimers.Ihe.Communication.Tests
                             var response =
                                 await client.Send(request).ConfigureAwait(false);
                             return response != null;
+                        });
+
+            var results = await Task.WhenAll(tasks).ConfigureAwait(false);
+
+            Assert.All(results, Assert.True);
+        }
+
+        [Fact]
+        public async Task WhenSendingMultipleSequentialMessageThenGetsAckForAll()
+        {
+            IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
+            var connectionFactory =
+                new SequentialMllpConnectionFactory(IPAddress.Loopback.ToString(), Port);
+            var client = await connectionFactory.Get();
+
+            var tasks = Enumerable.Repeat(false, 3)
+                    .Select(
+                        async _ =>
+                        {
+                            var request = new QBP_Q11();
+                            request.MSH.MessageControlID.Value = generator.NextId();
+                            var response =
+                                await client.Send(request).ConfigureAwait(false);
+                            return response.Message is ACK;
                         });
 
             var results = await Task.WhenAll(tasks).ConfigureAwait(false);

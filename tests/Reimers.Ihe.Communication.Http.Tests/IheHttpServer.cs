@@ -30,12 +30,13 @@ namespace Reimers.Ihe.Communication.Http.Tests
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
+    using NHapi.Base.Parser;
 
     public class IheHttpServer : IDisposable
     {
         private readonly TestServer _server;
 
-        public IheHttpServer(IEnumerable<string> urls, IHl7MessageMiddleware middleware)
+        public IheHttpServer(IEnumerable<string> urls, IHl7MessageMiddleware middleware, PipeParser parser)
         {
             _server = new TestServer(new WebHostBuilder()
                 .UseUrls(urls.ToArray())
@@ -45,37 +46,37 @@ namespace Reimers.Ihe.Communication.Http.Tests
                        {
                            using var reader = new StreamReader(ctx.Request.Body);
                            var hl7 = await reader.ReadToEndAsync().ConfigureAwait(false);
-                           var response = await middleware.Handle(new Hl7Message(hl7, ctx.Connection.RemoteIpAddress?.ToString()))
+                           var msg = parser.Parse(hl7);
+                           var response = await middleware.Handle(new Hl7Message(msg, ctx.Connection.RemoteIpAddress?.ToString()))
                                .ConfigureAwait(false);
-                           if (!string.IsNullOrWhiteSpace(response))
-                           {
-                               var owinResponse = ctx.Response;
-                               owinResponse.StatusCode = (int)HttpStatusCode.OK;
-                               var charset =
-                                   ctx.Request.ContentType?.Contains(';') == true
-                                       ? ctx.Request.ContentType
-                                           ?.Split(
-                                               ';',
-                                               StringSplitOptions
-                                                   .RemoveEmptyEntries)
-                                           .Last()
-                                           .Replace(
-                                               "charset=",
-                                               "",
-                                               StringComparison
-                                                   .InvariantCultureIgnoreCase)
-                                           .Trim()
-                                       : null;
-                               var encoding = string.IsNullOrWhiteSpace(charset)
-                                   ? Encoding.ASCII
-                                   : Encoding.GetEncoding(charset);
 
-                               owinResponse.ContentType = "application/hl7-v2; charset=" + encoding.WebName;
-                               await owinResponse.BodyWriter.WriteAsync(
-                                   encoding.GetBytes(response)
-                                       .AsMemory()).ConfigureAwait(false);
-                               await owinResponse.CompleteAsync().ConfigureAwait(false);
-                           }
+                           var owinResponse = ctx.Response;
+                           owinResponse.StatusCode = (int)HttpStatusCode.OK;
+                           var charset =
+                               ctx.Request.ContentType?.Contains(';') == true
+                                   ? ctx.Request.ContentType
+                                       ?.Split(
+                                           ';',
+                                           StringSplitOptions
+                                               .RemoveEmptyEntries)
+                                       .Last()
+                                       .Replace(
+                                           "charset=",
+                                           "",
+                                           StringComparison
+                                               .InvariantCultureIgnoreCase)
+                                       .Trim()
+                                   : null;
+                           var encoding = string.IsNullOrWhiteSpace(charset)
+                               ? Encoding.ASCII
+                               : Encoding.GetEncoding(charset);
+
+                           owinResponse.ContentType = "application/hl7-v2; charset=" + encoding.WebName;
+                           var output = parser.Encode(response);
+                           await owinResponse.BodyWriter.WriteAsync(
+                               encoding.GetBytes(output)
+                                   .AsMemory()).ConfigureAwait(false);
+                           await owinResponse.CompleteAsync().ConfigureAwait(false);
                        });
                 }));
         }

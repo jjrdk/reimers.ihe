@@ -33,28 +33,30 @@ namespace Reimers.Ihe.Communication
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using NHapi.Base.Parser;
 
     internal class MllpHost : IDisposable
     {
         private readonly TcpClient _client;
         private readonly IMessageLog _messageLog;
+        private readonly PipeParser _parser;
         private readonly Encoding _encoding;
         private readonly IHl7MessageMiddleware _middleware;
-
-        private readonly CancellationTokenSource _tokenSource =
-            new CancellationTokenSource();
-
-        private Stream _stream;
-        private Task _readThread;
+        private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
+        private readonly SemaphoreSlim _asyncLock = new SemaphoreSlim(1, 1);
+        private Stream _stream = null!;
+        private Task _readThread = null!;
 
         private MllpHost(
             TcpClient client,
             IMessageLog messageLog,
+            PipeParser parser,
             Encoding encoding,
             IHl7MessageMiddleware middleware)
         {
             _client = client;
             _messageLog = messageLog;
+            _parser = parser;
             _encoding = encoding;
             _middleware = middleware;
         }
@@ -65,14 +67,16 @@ namespace Reimers.Ihe.Communication
             TcpClient tcpClient,
             IMessageLog messageLog,
             IHl7MessageMiddleware middleware,
-            Encoding encoding = null,
-            X509Certificate serverCertificate = null,
-            RemoteCertificateValidationCallback
+            PipeParser? parser = null,
+            Encoding? encoding = null,
+            X509Certificate? serverCertificate = null,
+            RemoteCertificateValidationCallback?
                 userCertificateValidationCallback = null)
         {
             var host = new MllpHost(
                 tcpClient,
                 messageLog,
+                parser ?? new PipeParser(),
                 encoding ?? Encoding.ASCII,
                 middleware);
             var stream = tcpClient.GetStream();
@@ -104,8 +108,8 @@ namespace Reimers.Ihe.Communication
         {
             _client.Close();
             _client.Dispose();
-            _stream?.Close();
-            _stream?.Dispose();
+            _stream.Close();
+            _stream.Dispose();
         }
 
         private async Task ReadStream(CancellationToken cancellationToken)
@@ -123,11 +127,13 @@ namespace Reimers.Ihe.Communication
                         new[] { previous, current }))
                     {
                         messageBuilder.RemoveAt(messageBuilder.Count - 1);
-                        await SendResponse(
+                        _ = SendResponse(
                                 messageBuilder.ToArray(),
                                 cancellationToken)
                             .ConfigureAwait(false);
-                        break;
+                        messageBuilder.Clear();
+                        previous = 0;
+                        continue;
                     }
 
                     if (previous == 0 && current == 11)
@@ -164,15 +170,17 @@ namespace Reimers.Ihe.Communication
         {
             cancellationToken.ThrowIfCancellationRequested();
             var s = _encoding.GetString(messageBuilder);
+            var received = _parser.Parse(s);
             var message = new Hl7Message(
-                s,
+                received,
                 _client.Client.RemoteEndPoint.ToString());
             await _messageLog.Write(s).ConfigureAwait(false);
             var result = await _middleware.Handle(message, cancellationToken)
                 .ConfigureAwait(false);
 
             cancellationToken.ThrowIfCancellationRequested();
-            await WriteToStream(result, cancellationToken)
+            var resultMsg = _parser.Encode(result);
+            await WriteToStream(resultMsg, cancellationToken)
                 .ConfigureAwait(false);
         }
 
@@ -180,6 +188,8 @@ namespace Reimers.Ihe.Communication
             string response,
             CancellationToken cancellationToken)
         {
+            await _asyncLock.WaitAsync(cancellationToken);
+            await _messageLog.Write(response).ConfigureAwait(false);
             var bytes = _encoding.GetBytes(response);
             var buffer = ArrayPool<byte>.Shared.Rent(bytes.Length + 3);
             Constants.StartBlock.CopyTo(buffer, 0);
@@ -194,6 +204,7 @@ namespace Reimers.Ihe.Communication
                 .ConfigureAwait(false);
 
             ArrayPool<byte>.Shared.Return(buffer);
+            _asyncLock.Release(1);
         }
     }
 }

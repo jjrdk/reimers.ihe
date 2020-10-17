@@ -33,47 +33,44 @@ namespace Reimers.Ihe.Communication
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using NHapi.Base.Model;
+    using NHapi.Base.Parser;
 
     /// <summary>
     /// Defines the <see cref="MllpClient"/> class.
     /// </summary>
     public class MllpClient : IHostConnection
     {
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+        private readonly Dictionary<string, TaskCompletionSource<Hl7Message>> _messages = new Dictionary<string, TaskCompletionSource<Hl7Message>>();
         private readonly string _address;
         private readonly int _port;
         private readonly IMessageLog _messageLog;
+        private readonly PipeParser _parser;
         private readonly Encoding _encoding;
-        private readonly X509CertificateCollection _clientCertificates;
-
-        private readonly RemoteCertificateValidationCallback
-            _userCertificateValidationCallback;
-
-        private string _remoteAddress;
-
-        private readonly TaskCompletionSource<Hl7Message> _completionSource =
-            new TaskCompletionSource<Hl7Message>();
-
-        private Stream _stream;
-
-        private readonly CancellationTokenSource _tokenSource =
-            new CancellationTokenSource();
-
-        private TcpClient _tcpClient;
-        private Task _readThread;
-        private bool _sending;
+        private readonly X509CertificateCollection? _clientCertificates;
+        private readonly RemoteCertificateValidationCallback? _userCertificateValidationCallback;
+        private string _remoteAddress = null!;
+        private Stream _stream = null!;
+        private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
+        private TcpClient _tcpClient = null!;
+#pragma warning disable IDE0052 // Remove unread private members
+        private Task _readThread = null!;
+#pragma warning restore IDE0052 // Remove unread private members
 
         private MllpClient(
             string address,
             int port,
             IMessageLog messageLog,
+            PipeParser parser,
             Encoding encoding,
-            X509CertificateCollection clientCertificates,
-            RemoteCertificateValidationCallback
-                userCertificateValidationCallback)
+            X509CertificateCollection? clientCertificates,
+            RemoteCertificateValidationCallback? userCertificateValidationCallback)
         {
             _address = address;
             _port = port;
             _messageLog = messageLog;
+            _parser = parser;
             _encoding = encoding;
             _clientCertificates = clientCertificates;
             _userCertificateValidationCallback =
@@ -86,6 +83,7 @@ namespace Reimers.Ihe.Communication
         /// <param name="address"></param>
         /// <param name="port"></param>
         /// <param name="messageLog"></param>
+        /// <param name="parser"></param>
         /// <param name="encoding"></param>
         /// <param name="clientCertificates"></param>
         /// <param name="userCertificateValidationCallback"></param>
@@ -94,16 +92,18 @@ namespace Reimers.Ihe.Communication
             string address,
             int port,
             IMessageLog messageLog,
-            Encoding encoding,
-            X509CertificateCollection clientCertificates = null,
-            RemoteCertificateValidationCallback
+            PipeParser? parser = null,
+            Encoding? encoding = null,
+            X509CertificateCollection? clientCertificates = null,
+            RemoteCertificateValidationCallback?
                 userCertificateValidationCallback = null)
         {
             var instance = new MllpClient(
                 address,
                 port,
                 messageLog,
-                encoding,
+                parser ?? new PipeParser(),
+                encoding ?? Encoding.ASCII,
                 clientCertificates,
                 userCertificateValidationCallback);
             await instance.Setup().ConfigureAwait(false);
@@ -116,21 +116,15 @@ namespace Reimers.Ihe.Communication
         /// <param name="message">The message to send.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> for the async operation.</param>
         /// <returns></returns>
-        public async Task<Hl7Message> Send(
-            string message,
+        public async Task<Hl7Message> Send<TMessage>(
+            TMessage message,
             CancellationToken cancellationToken = default)
+        where TMessage : IMessage
         {
-            lock (_stream)
-            {
-                if (_sending)
-                {
-                    throw new InvalidOperationException("Transaction ongoing");
-                }
+            await _semaphore.WaitAsync(cancellationToken);
 
-                _sending = true;
-            }
-
-            var bytes = _encoding.GetBytes(message);
+            var hl7 = _parser.Encode(message);
+            var bytes = _encoding.GetBytes(hl7);
             var length = bytes.Length
                          + Constants.StartBlock.Length
                          + Constants.EndBlock.Length;
@@ -154,11 +148,15 @@ namespace Reimers.Ihe.Communication
                 Constants.StartBlock.Length + bytes.Length,
                 Constants.EndBlock.Length);
 
-            await _messageLog.Write(message).ConfigureAwait(false);
+            var completionSource = new TaskCompletionSource<Hl7Message>();
+            var key = message.GetMessageControlId();
+            _messages.Add(key, completionSource);
+            await _messageLog.Write(hl7).ConfigureAwait(false);
             await _stream.WriteAsync(buffer, 0, length, cancellationToken)
                 .ConfigureAwait(false);
             ArrayPool<byte>.Shared.Return(buffer);
-            return await _completionSource.Task.ConfigureAwait(false);
+            _semaphore.Release(1);
+            return await completionSource.Task.ConfigureAwait(false);
         }
 
         private async Task Setup()
@@ -212,18 +210,29 @@ namespace Reimers.Ihe.Communication
                     {
                         messageBuilder.RemoveAt(messageBuilder.Count - 1);
                         var s = _encoding.GetString(messageBuilder.ToArray());
-                        var message = new Hl7Message(s, _remoteAddress);
-                        _completionSource.SetResult(message);
-                        break;
+                        messageBuilder.Clear();
+                        previous = 0;
+                        var msg = _parser.Parse(s);
+                        var message = new Hl7Message(msg, _remoteAddress);
+                        var controlId = msg.GetMessageControlId();
+                        var completionSource = _messages[controlId];
+                        _messages.Remove(controlId);
+                        completionSource.SetResult(message);
+                        continue;
                     }
 
                     if (previous == 0 && current == 11)
                     {
                         if (messageBuilder.Count > 0)
                         {
-                            _completionSource.SetException(
-                                new Exception(
-                                    $"Unexpected character: {current:x2}"));
+                            foreach (var completionSource in _messages.Values)
+                            {
+                                completionSource.SetException(
+                                   new Exception(
+                                       $"Unexpected character: {current:x2}"));
+
+                            }
+                            _messages.Clear();
                         }
                     }
                     else
@@ -238,7 +247,12 @@ namespace Reimers.Ihe.Communication
                 Trace.TraceInformation(io.Message);
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    _completionSource.SetException(io);
+                    foreach (var completionSource in _messages.Values)
+                    {
+                        completionSource.SetException(io);
+
+                    }
+                    _messages.Clear();
                 }
             }
         }

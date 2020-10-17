@@ -24,6 +24,7 @@ namespace Reimers.Ihe.Communication
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using NHapi.Base.Model;
     using NHapi.Base.Parser;
 
     /// <summary>
@@ -51,17 +52,16 @@ namespace Reimers.Ihe.Communication
         /// <param name="message">The <see cref="Hl7Message"/> to handle.</param>
         /// <param name="cancellation"></param>
         /// <returns>An HL7 response as a <see cref="string"/>.</returns>
-        public async Task<string> Handle(
+        public async Task<IMessage> Handle(
             Hl7Message message,
             CancellationToken cancellation = default)
         {
             cancellation.ThrowIfCancellationRequested();
-            var msg = _parser.Parse(message.Message);
-            var structureName = msg.GetStructureName();
-            var handler = _handlers[msg.Version + structureName];
-            var response = await handler.Handle(msg, cancellation).ConfigureAwait(false);
+            var structureName = message.Message.GetStructureName();
+            var handler = _handlers[message.Message.Version + structureName];
+            var response = await handler.Handle(message.Message, cancellation).ConfigureAwait(false);
 
-            return _parser.Encode(response);
+            return response;
         }
     }
 }

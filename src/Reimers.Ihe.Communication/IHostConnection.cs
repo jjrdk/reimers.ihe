@@ -23,6 +23,7 @@ namespace Reimers.Ihe.Communication
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using NHapi.Base.Model;
 
     /// <summary>
     /// Defines the interface for a connection to an IHE host.
@@ -35,8 +36,8 @@ namespace Reimers.Ihe.Communication
         /// <param name="message">The message to send.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> for the operation.</param>
         /// <returns>An <see cref="Hl7Message"/> containing the response and source address.</returns>
-        Task<Hl7Message> Send(
-            string message,
-            CancellationToken cancellationToken = default);
+        Task<Hl7Message> Send<TMessage>(
+            TMessage message,
+            CancellationToken cancellationToken = default) where TMessage : IMessage;
     }
 }

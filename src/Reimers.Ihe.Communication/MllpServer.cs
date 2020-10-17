@@ -30,6 +30,7 @@ namespace Reimers.Ihe.Communication
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using NHapi.Base.Parser;
 
     /// <summary>
     /// Defines an IHE server using MLLP connections.
@@ -38,6 +39,7 @@ namespace Reimers.Ihe.Communication
     {
         private readonly IMessageLog _messageLog;
         private readonly IHl7MessageMiddleware _middleware;
+        private readonly PipeParser? _parser;
         private readonly Encoding _encoding;
         private readonly X509Certificate _serverCertificate;
 
@@ -66,13 +68,14 @@ namespace Reimers.Ihe.Communication
             IPEndPoint endPoint,
             IMessageLog messageLog,
             IHl7MessageMiddleware middleware,
-            Encoding encoding = null,
-            X509Certificate serverCertificate = null,
-            RemoteCertificateValidationCallback
-                userCertificateValidationCallback = null)
+            PipeParser? parser = null,
+            Encoding? encoding = null,
+            X509Certificate? serverCertificate = null,
+            RemoteCertificateValidationCallback? userCertificateValidationCallback = null)
         {
             _messageLog = messageLog;
             _middleware = middleware;
+            _parser = parser;
             _encoding = encoding;
             _serverCertificate = serverCertificate;
             _userCertificateValidationCallback =
@@ -124,6 +127,7 @@ namespace Reimers.Ihe.Communication
                             client,
                             _messageLog,
                             _middleware,
+                            _parser,
                             _encoding,
                             _serverCertificate,
                             _userCertificateValidationCallback)

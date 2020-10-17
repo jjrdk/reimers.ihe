@@ -25,6 +25,7 @@ namespace Reimers.Ihe.Communication.Http
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
     using System.Threading.Tasks;
+    using NHapi.Base.Parser;
 
     /// <summary>
     /// Defines the default MLLP connection factory.
@@ -32,6 +33,7 @@ namespace Reimers.Ihe.Communication.Http
     public class DefaultHttpConnectionFactory : IDisposable
     {
         private readonly Uri _address;
+        private readonly PipeParser _parser;
         private readonly Encoding _encoding;
         private readonly HttpMessageHandler _httpClientHandler;
 
@@ -39,17 +41,20 @@ namespace Reimers.Ihe.Communication.Http
         /// Initializes a new instance of the <see cref="DefaultHttpConnectionFactory"/> class.
         /// </summary>
         /// <param name="address">The address of the remote server.</param>
+        /// <param name="parser"></param>
         /// <param name="encoding">The <see cref="Encoding"/> to use for data transfer. If no value is specified, then <see cref="Encoding.ASCII"/> is used.</param>
         /// <param name="clientCertificateCollection">The client certificates to use for connection security.</param>
         /// <param name="httpClientHandlerFactory"></param>
         public DefaultHttpConnectionFactory(
             Uri address,
-            Encoding encoding = null,
-            X509CertificateCollection clientCertificateCollection = null,
-            Func<HttpMessageHandler> httpClientHandlerFactory = null)
+            PipeParser? parser = null,
+            Encoding? encoding = null,
+            X509CertificateCollection? clientCertificateCollection = null,
+            Func<HttpMessageHandler>? httpClientHandlerFactory = null)
         {
             _address = address;
-            _encoding = encoding;
+            _parser = parser ?? new PipeParser();
+            _encoding = encoding ?? Encoding.ASCII;
             if (httpClientHandlerFactory != null)
             {
                 _httpClientHandler = httpClientHandlerFactory();
@@ -60,7 +65,10 @@ namespace Reimers.Ihe.Communication.Http
                 {
                     AllowAutoRedirect = true,
                 };
-                handler.ClientCertificates.AddRange(clientCertificateCollection);
+                if (clientCertificateCollection != null)
+                {
+                    handler.ClientCertificates.AddRange(clientCertificateCollection);
+                }
                 handler.ClientCertificateOptions = ClientCertificateOption.Manual;
                 _httpClientHandler = handler;
             }
@@ -72,13 +80,13 @@ namespace Reimers.Ihe.Communication.Http
         /// <returns>An MLLP connection as an async operation.</returns>
         public Task<IHostConnection> Get()
         {
-            return Task.FromResult<IHostConnection>(new IheHttpClient(_address, _httpClientHandler, _encoding));
+            return Task.FromResult<IHostConnection>(new IheHttpClient(_address, _httpClientHandler, _parser, _encoding));
         }
 
         /// <inheritdoc />
         public void Dispose()
         {
-            _httpClientHandler?.Dispose();
+            _httpClientHandler.Dispose();
         }
     }
 }

@@ -36,7 +36,8 @@ namespace Reimers.Ihe.Communication.Http.Tests
         {
             _server = new IheHttpServer(
                 new[] { "http://localhost:8080" },
-                new TestMiddleware());
+                new TestMiddleware(),
+                new PipeParser());
         }
 
         [Theory]
@@ -45,11 +46,10 @@ namespace Reimers.Ihe.Communication.Http.Tests
         {
             using var connectionFactory = new DefaultHttpConnectionFactory(
                 new Uri("http://localhost:8080"),
+                new PipeParser(),
                 encoding,
                 httpClientHandlerFactory: _server.CreateClientHandler);
-            var client = new TestTransaction(
-                connectionFactory.Get,
-                new PipeParser());
+            var client = new TestTransaction(connectionFactory.Get);
             var request = new QBP_Q11();
             var response = await client.Send(request).ConfigureAwait(false);
             Assert.NotNull(response);

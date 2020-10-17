@@ -22,7 +22,7 @@ namespace Reimers.Ihe.Communication
 {
 	using System.Threading.Tasks;
 
-	/// <summary>
+    /// <summary>
 	/// Defines the public interface for an HL7 message log.
 	/// </summary>
 	public interface IMessageLog

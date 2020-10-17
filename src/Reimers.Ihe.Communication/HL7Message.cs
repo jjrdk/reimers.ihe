@@ -20,6 +20,8 @@
 
 namespace Reimers.Ihe.Communication
 {
+    using NHapi.Base.Model;
+
     /// <summary>
     /// Defines the container for received HL7 content.
     /// </summary>
@@ -30,7 +32,7 @@ namespace Reimers.Ihe.Communication
         /// </summary>
         /// <param name="message">The raw HL7 message.</param>
         /// <param name="sourceAddress">The address the message was received from.</param>
-        public Hl7Message(string message, string sourceAddress)
+        public Hl7Message(IMessage message, string sourceAddress)
         {
             Message = message;
             SourceAddress = sourceAddress;
@@ -44,7 +46,7 @@ namespace Reimers.Ihe.Communication
         /// <summary>
         /// Gets the raw received HL7 message.
         /// </summary>
-        public string Message { get; }
+        public IMessage Message { get; }
 
         /// <inheritdoc />
         public override int GetHashCode()

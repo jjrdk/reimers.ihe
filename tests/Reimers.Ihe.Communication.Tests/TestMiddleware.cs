@@ -22,6 +22,7 @@ namespace Reimers.Ihe.Communication.Tests
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using NHapi.Base.Model;
     using NHapi.Base.Parser;
     using NHapi.Model.V251.Message;
 
@@ -29,13 +30,14 @@ namespace Reimers.Ihe.Communication.Tests
     {
         private readonly PipeParser _parser = new PipeParser();
 
-        public Task<string> Handle(
+        public Task<IMessage> Handle(
             Hl7Message message,
             CancellationToken cancellation = default)
         {
+            var controlId = message.Message.GetMessageControlId();
             var ack = new ACK();
-            var hl7 = _parser.Encode(ack);
-            return Task.FromResult(hl7);
+            ack.MSH.MessageControlID.Value = controlId;
+            return Task.FromResult<IMessage>(ack);
         }
     }
 }

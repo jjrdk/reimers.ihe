@@ -25,7 +25,7 @@ namespace Reimers.Ihe.Communication.Tests
                 var adt = new ADT_A01();
                 adt.MSH.MessageControlID.Value = generator.NextId();
 
-                var msg = new Hl7Message(parser.Encode(adt), "");
+                var msg = new Hl7Message(adt, "");
                 var response = await _defaultHl7MessageMiddleware.Handle(msg).ConfigureAwait(false);
 
                 Assert.NotNull(response);
@@ -42,7 +42,7 @@ namespace Reimers.Ihe.Communication.Tests
         protected override Task<ACK> HandleInternal(ADT_A01 message)
         {
             var result = new ACK();
-            result.MSH.MessageControlID.Value = DefaultMessageControlIdGenerator.Instance.NextId();
+            result.MSH.MessageControlID.Value = message.MSH.MessageControlID.Value;
             result.MSA.MessageControlID.Value = message.MSH.MessageControlID.Value;
 
             return Task.FromResult(result);

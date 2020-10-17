@@ -1,24 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <RootNamespace>Reimers.Ihe.Communication.Http</RootNamespace>
-    <PackageId>Reimers.Ihe.Communication.Http</PackageId>
-    <Title>Reimers.Ihe.Communication.Http</Title>
-    <Description>Classes to handle HTTP connections and IHE transactions.</Description>
-    <PackageTags>HL7 IHE</PackageTags>
-    <PackageReleaseNotes>Update to net standard 2.0.</PackageReleaseNotes>
-    <AssemblyName>reimers.ihe.communication.http</AssemblyName>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Reimers.Ihe.Communication.xml</DocumentationFile>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-  </PropertyGroup>
+	<PropertyGroup>
+		<RootNamespace>Reimers.Ihe.Communication.Http</RootNamespace>
+		<PackageId>Reimers.Ihe.Communication.Http</PackageId>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<Title>Reimers.Ihe.Communication.Http</Title>
+		<Description>Classes to handle HTTP connections and IHE transactions.</Description>
+		<PackageTags>HL7 IHE</PackageTags>
+		<PackageReleaseNotes>Update to net standard 2.0.</PackageReleaseNotes>
+		<AssemblyName>reimers.ihe.communication.http</AssemblyName>
+		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Reimers.Ihe.Communication.xml</DocumentationFile>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<Nullable>enable</Nullable>
+		<IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+	</ItemGroup>
 
-  <Import Project="../../shared.proj"/>
-  <ItemGroup>
-    <ProjectReference Include="..\Reimers.Ihe.Communication\Reimers.Ihe.Communication.csproj" />
-  </ItemGroup>
+	<Import Project="../../shared.proj"/>
+	<ItemGroup>
+		<ProjectReference Include="..\Reimers.Ihe.Communication\Reimers.Ihe.Communication.csproj" />
+	</ItemGroup>
 </Project>
