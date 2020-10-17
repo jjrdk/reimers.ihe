@@ -21,7 +21,6 @@ namespace Reimers.Ihe.Communication.Tests
             public async Task WhenHandlingMessageThenReturnsResponse()
             {
                 IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
-                var parser = new PipeParser();
                 var adt = new ADT_A01();
                 adt.MSH.MessageControlID.Value = generator.NextId();
 

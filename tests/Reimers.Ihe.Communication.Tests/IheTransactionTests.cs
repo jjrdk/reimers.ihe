@@ -24,7 +24,6 @@ namespace Reimers.Ihe.Communication.Tests
     using System.Linq;
     using System.Net;
     using System.Threading.Tasks;
-    using NHapi.Base.Parser;
     using NHapi.Model.V251.Message;
     using Xunit;
 
@@ -61,12 +60,13 @@ namespace Reimers.Ihe.Communication.Tests
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
             var connectionFactory =
                 new DefaultMllpConnectionFactory(IPAddress.Loopback.ToString(), Port);
-            var client = new TestTransaction(connectionFactory.Get);
-            var request = new QBP_Q11();
+
             var tasks = Enumerable.Repeat(false, 10)
                     .Select(
                         async _ =>
                         {
+                            var client = new TestTransaction(connectionFactory.Get);
+                            var request = new QBP_Q11();
                             request.MSH.MessageControlID.Value = generator.NextId();
                             var response =
                                 await client.Send(request).ConfigureAwait(false);
@@ -86,7 +86,7 @@ namespace Reimers.Ihe.Communication.Tests
                 new SequentialMllpConnectionFactory(IPAddress.Loopback.ToString(), Port);
             var client = await connectionFactory.Get();
 
-            var tasks = Enumerable.Repeat(false, 3)
+            var tasks = Enumerable.Repeat(false, 100)
                     .Select(
                         async _ =>
                         {

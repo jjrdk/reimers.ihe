@@ -45,7 +45,9 @@ namespace Reimers.Ihe.Communication
         private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
         private readonly SemaphoreSlim _asyncLock = new SemaphoreSlim(1, 1);
         private Stream _stream = null!;
+#pragma warning disable IDE0052 // Remove unread private members
         private Task _readThread = null!;
+#pragma warning restore IDE0052 // Remove unread private members
 
         private MllpHost(
             TcpClient client,

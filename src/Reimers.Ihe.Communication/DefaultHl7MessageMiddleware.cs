@@ -32,17 +32,14 @@ namespace Reimers.Ihe.Communication
     /// </summary>
     public class DefaultHl7MessageMiddleware : IHl7MessageMiddleware
     {
-        private readonly PipeParser _parser;
         private readonly Dictionary<string, IIheTransactionHandler> _handlers;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DefaultHl7MessageMiddleware"/> class.
         /// </summary>
         /// <param name="handlers">The message handlers to use.</param>
-        /// <param name="parser">the message parser.</param>
-        public DefaultHl7MessageMiddleware(PipeParser parser = null, params IIheTransactionHandler[] handlers)
+        public DefaultHl7MessageMiddleware(params IIheTransactionHandler[] handlers)
         {
-            _parser = parser ?? new PipeParser();
             _handlers = handlers.ToDictionary(x => x.Version + x.Handles, x => x);
         }
 

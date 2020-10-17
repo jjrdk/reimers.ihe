@@ -41,19 +41,15 @@ namespace Reimers.Ihe.Communication
         private readonly IHl7MessageMiddleware _middleware;
         private readonly PipeParser? _parser;
         private readonly Encoding _encoding;
-        private readonly X509Certificate _serverCertificate;
-
-        private readonly RemoteCertificateValidationCallback
-            _userCertificateValidationCallback;
-
+        private readonly X509Certificate? _serverCertificate;
+        private readonly RemoteCertificateValidationCallback? _userCertificateValidationCallback;
         private readonly TcpListener _listener;
         private readonly List<MllpHost> _connections = new List<MllpHost>();
         private readonly Timer _timer;
-
-        private readonly CancellationTokenSource _tokenSource =
-            new CancellationTokenSource();
-
-        private Task _readTask;
+        private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
+#pragma warning disable IDE0052 // Remove unread private members
+        private Task? _readTask;
+#pragma warning restore IDE0052 // Remove unread private members
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MllpServer"/> class.
@@ -61,6 +57,7 @@ namespace Reimers.Ihe.Communication
         /// <param name="endPoint">The <see cref="IPEndPoint"/> the server will listen on.</param>
         /// <param name="messageLog">The <see cref="IMessageLog"/> to use for logging incoming messages.</param>
         /// <param name="middleware">The message handling middleware.</param>
+        /// <param name="parser">The <see cref="PipeParser"/> to use for parsing and encoding.</param>
         /// <param name="encoding">The <see cref="Encoding"/> to use for network transfers.</param>
         /// <param name="serverCertificate">The certificates to use for secure connections.</param>
         /// <param name="userCertificateValidationCallback">Optional certificate validation callback.</param>
@@ -76,10 +73,9 @@ namespace Reimers.Ihe.Communication
             _messageLog = messageLog;
             _middleware = middleware;
             _parser = parser;
-            _encoding = encoding;
+            _encoding = encoding ?? Encoding.ASCII;
             _serverCertificate = serverCertificate;
-            _userCertificateValidationCallback =
-                userCertificateValidationCallback;
+            _userCertificateValidationCallback = userCertificateValidationCallback;
             _listener = new TcpListener(endPoint);
             _timer = new Timer(
                 CleanConnections,

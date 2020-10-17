@@ -23,13 +23,10 @@ namespace Reimers.Ihe.Communication.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using NHapi.Base.Model;
-    using NHapi.Base.Parser;
     using NHapi.Model.V251.Message;
 
     public class TestMiddleware : IHl7MessageMiddleware
     {
-        private readonly PipeParser _parser = new PipeParser();
-
         public Task<IMessage> Handle(
             Hl7Message message,
             CancellationToken cancellation = default)
