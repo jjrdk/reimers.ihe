@@ -60,12 +60,12 @@ namespace Reimers.Ihe.Communication.Tests
         [Fact]
         public async Task WhenSendingMessageThenGetsAck()
         {
-            var connectionFactory = new DefaultMllpConnectionFactory(
+            var client = await MllpClient.Create(
                 IPAddress.Loopback.ToString(),
                 _port,
-                clientCertificateCollection: _cert,
-                userCertificateValidationCallback: UserCertificateValidationCallback);
-            var client = new TestTransaction(connectionFactory.Get);
+                clientCertificates: _cert,
+                userCertificateValidationCallback:
+                UserCertificateValidationCallback);
             var request = new QBP_Q11();
             request.MSH.MessageControlID.Value = "test";
             var response = await client.Send(request).ConfigureAwait(false);

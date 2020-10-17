@@ -91,7 +91,7 @@ namespace Reimers.Ihe.Communication
         public static async Task<IHostConnection> Create(
             string address,
             int port,
-            IMessageLog messageLog,
+            IMessageLog? messageLog = null,
             PipeParser? parser = null,
             Encoding? encoding = null,
             X509CertificateCollection? clientCertificates = null,
@@ -101,7 +101,7 @@ namespace Reimers.Ihe.Communication
             var instance = new MllpClient(
                 address,
                 port,
-                messageLog,
+                messageLog ?? NullLog.Get(),
                 parser ?? new PipeParser(),
                 encoding ?? Encoding.ASCII,
                 clientCertificates,

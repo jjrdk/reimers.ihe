@@ -45,9 +45,7 @@ namespace Reimers.Ihe.Communication.Tests
         public async Task WhenSendingMessageThenGetsAck()
         {
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
-            var connectionFactory =
-                new DefaultMllpConnectionFactory(IPAddress.Loopback.ToString(), Port);
-            var client = new TestTransaction(connectionFactory.Get);
+            var client = await MllpClient.Create(IPAddress.Loopback.ToString(), Port);
             var request = new QBP_Q11();
             request.MSH.MessageControlID.Value = generator.NextId();
             var response = await client.Send(request).ConfigureAwait(false);
@@ -58,14 +56,14 @@ namespace Reimers.Ihe.Communication.Tests
         public async Task WhenSendingMultipleParallelMessageThenGetsAckForAll()
         {
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
-            var connectionFactory =
-                new DefaultMllpConnectionFactory(IPAddress.Loopback.ToString(), Port);
 
             var tasks = Enumerable.Repeat(false, 10)
                     .Select(
                         async _ =>
                         {
-                            var client = new TestTransaction(connectionFactory.Get);
+                            using var client = await MllpClient.Create(
+                                IPAddress.Loopback.ToString(),
+                                Port);
                             var request = new QBP_Q11();
                             request.MSH.MessageControlID.Value = generator.NextId();
                             var response =
@@ -82,9 +80,9 @@ namespace Reimers.Ihe.Communication.Tests
         public async Task WhenSendingMultipleSequentialMessageThenGetsAckForAll()
         {
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
-            var connectionFactory =
-                new SequentialMllpConnectionFactory(IPAddress.Loopback.ToString(), Port);
-            var client = await connectionFactory.Get();
+            using var client = await MllpClient.Create(
+                IPAddress.Loopback.ToString(),
+                Port);
 
             var tasks = Enumerable.Repeat(false, 100)
                     .Select(
