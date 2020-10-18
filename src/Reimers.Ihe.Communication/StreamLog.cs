@@ -36,7 +36,7 @@ namespace Reimers.Ihe.Communication
 		/// </summary>
 		/// <param name="output"></param>
 		/// <param name="encoding"></param>
-		public StreamLog(Stream output, Encoding encoding = null)
+		public StreamLog(Stream output, Encoding? encoding = null)
 		{
 			_output = new StreamWriter(output, encoding ?? Encoding.UTF8);
 		}

@@ -1,7 +1,4 @@
-param
-(
-    $config = 'Release'
-)
+#!/usr/bin/env bash
 
 dotnet new tool-manifest
 dotnet tool install Cake.Tool

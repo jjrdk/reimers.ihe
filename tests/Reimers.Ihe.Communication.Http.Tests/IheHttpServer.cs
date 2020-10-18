@@ -21,6 +21,7 @@
 namespace Reimers.Ihe.Communication.Http.Tests
 {
     using System;
+    using System.Buffers;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -36,7 +37,7 @@ namespace Reimers.Ihe.Communication.Http.Tests
     {
         private readonly TestServer _server;
 
-        public IheHttpServer(IEnumerable<string> urls, IHl7MessageMiddleware middleware, PipeParser parser)
+        public IheHttpServer(IEnumerable<string> urls, IHl7MessageMiddleware middleware, ParserBase parser)
         {
             _server = new TestServer(new WebHostBuilder()
                 .UseUrls(urls.ToArray())
@@ -44,32 +45,33 @@ namespace Reimers.Ihe.Communication.Http.Tests
                 {
                     a.Use(async (ctx, next) =>
                        {
-                           using var reader = new StreamReader(ctx.Request.Body);
-                           var hl7 = await reader.ReadToEndAsync().ConfigureAwait(false);
-                           var msg = parser.Parse(hl7);
-                           var response = await middleware.Handle(new Hl7Message(msg, ctx.Connection.RemoteIpAddress?.ToString()))
+                           var charset =
+                                  ctx.Request.ContentType?.Contains(';') == true
+                                      ? ctx.Request.ContentType
+                                          ?.Split(
+                                              ';',
+                                              StringSplitOptions
+                                                  .RemoveEmptyEntries)
+                                          .Last()
+                                          .Replace(
+                                              "charset=",
+                                              "",
+                                              StringComparison
+                                                  .InvariantCultureIgnoreCase)
+                                          .Trim()
+                                      : null;
+                           var encoding = string.IsNullOrWhiteSpace(charset)
+                               ? Encoding.ASCII
+                               : Encoding.GetEncoding(charset);
+
+                           var reader = ctx.Request.BodyReader;
+                           var hl7 = await reader.ReadAsync().ConfigureAwait(false);
+                           var msg = parser.Parse(encoding.GetString(hl7.Buffer.ToArray()));
+                           var response = await middleware.Handle(new Hl7Message(msg, ctx.Connection.RemoteIpAddress?.ToString() ?? string.Empty))
                                .ConfigureAwait(false);
 
                            var owinResponse = ctx.Response;
                            owinResponse.StatusCode = (int)HttpStatusCode.OK;
-                           var charset =
-                               ctx.Request.ContentType?.Contains(';') == true
-                                   ? ctx.Request.ContentType
-                                       ?.Split(
-                                           ';',
-                                           StringSplitOptions
-                                               .RemoveEmptyEntries)
-                                       .Last()
-                                       .Replace(
-                                           "charset=",
-                                           "",
-                                           StringComparison
-                                               .InvariantCultureIgnoreCase)
-                                       .Trim()
-                                   : null;
-                           var encoding = string.IsNullOrWhiteSpace(charset)
-                               ? Encoding.ASCII
-                               : Encoding.GetEncoding(charset);
 
                            owinResponse.ContentType = "application/hl7-v2; charset=" + encoding.WebName;
                            var output = parser.Encode(response);

@@ -9,10 +9,6 @@
 		<PackageReleaseNotes>Update to net standard 2.0.</PackageReleaseNotes>
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Reimers.Ihe.Communication.xml</DocumentationFile>
 		<AssemblyName>reimers.ihe.communication</AssemblyName>
-		<PublishRepositoryUrl>true</PublishRepositoryUrl>
-		<IncludeSymbols>true</IncludeSymbols>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>

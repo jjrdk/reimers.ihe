@@ -1,35 +1,36 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <PackageId>Reimers.Ihe.Communication.Http.Tests</PackageId>
-    <Title>reimers.ihe.communication.tests</Title>
-    <Version>0.1.0</Version>
-    <Authors>Jacob Reimers</Authors>
-    <Owners>Jacob Reimers</Owners>
-    <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
-    <Description>Classes to handle MLLP connections and transactions.</Description>
-    <Copyright>Reimers.dk © 2016 - 2017</Copyright>
-    <Company>Reimers.dk</Company>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <PackageTags>HL7 IHE</PackageTags>
-    <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
-  </PropertyGroup>
+    <PropertyGroup>
+        <PackageId>Reimers.Ihe.Communication.Http.Tests</PackageId>
+        <Title>reimers.ihe.communication.tests</Title>
+        <Version>0.1.0</Version>
+        <Authors>Jacob Reimers</Authors>
+        <Owners>Jacob Reimers</Owners>
+        <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
+        <Description>Classes to handle MLLP connections and transactions.</Description>
+        <Copyright>Reimers.dk © 2016 - 2017</Copyright>
+        <Company>Reimers.dk</Company>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <PackageTags>HL7 IHE</PackageTags>
+        <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
+    </PropertyGroup>
 
-  <PropertyGroup>
-    <DocumentationFile></DocumentationFile>
-    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-  </PropertyGroup>
+    <PropertyGroup>
+        <DocumentationFile></DocumentationFile>
+        <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.1.9" />
-    <PackageReference Include="NHapi.Model.V251" Version="0.1.0" />
-    <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <ProjectReference Include="..\..\src\Reimers.Ihe.Communication\Reimers.Ihe.Communication.csproj" />
-    <ProjectReference Include="..\..\src\Reimers.Ihe.Communication.Http\Reimers.Ihe.Communication.Http.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
+        <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.1.9" />
+        <PackageReference Include="NHapi.Model.V251" Version="0.1.0" />
+        <PackageReference Include="xunit" Version="2.4.1" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <ProjectReference Include="..\..\src\Reimers.Ihe.Communication\Reimers.Ihe.Communication.csproj" />
+        <ProjectReference Include="..\..\src\Reimers.Ihe.Communication.Http\Reimers.Ihe.Communication.Http.csproj" />
+    </ItemGroup>
 
 </Project>

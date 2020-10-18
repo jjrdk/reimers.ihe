@@ -44,13 +44,12 @@ namespace Reimers.Ihe.Communication
         {
             cancellationToken.ThrowIfCancellationRequested();
             var msg = (TMessage)message;
-            var (verified, response1) = await VerifyIncomingMessage(msg, cancellationToken).ConfigureAwait(false);
-            var response = response1;
+            var (verified, response) = await VerifyIncomingMessage(msg, cancellationToken).ConfigureAwait(false);
             if (verified)
             {
                 response = await HandleInternal(msg).ConfigureAwait(false);
             }
-            return await ConfigureHeaders(response).ConfigureAwait(false);
+            return await ConfigureHeaders(response!).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -72,9 +71,9 @@ namespace Reimers.Ihe.Communication
         /// <para>If the incoming message cannot be verified, the method returns <c>false</c> as status and an error response message.</para>
         /// <para>If the verification is successful, the method returns <c>true</c> and them response message is null.</para>
         /// </returns>
-        protected virtual Task<(bool verified, TResponse response)> VerifyIncomingMessage(TMessage message, CancellationToken cancellationToken)
+        protected virtual Task<(bool verified, TResponse? response)> VerifyIncomingMessage(TMessage message, CancellationToken cancellationToken)
         {
-            return Task.FromResult<(bool, TResponse)>((true, null));
+            return Task.FromResult<(bool, TResponse?)>((true, null));
         }
 
         /// <summary>
