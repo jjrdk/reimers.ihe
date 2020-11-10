@@ -25,7 +25,6 @@ namespace Reimers.Ihe.Communication.Tests
     using System.Net.Security;
     using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
-    using NHapi.Base.Parser;
     using NHapi.Model.V251.Message;
     using Xunit;
 

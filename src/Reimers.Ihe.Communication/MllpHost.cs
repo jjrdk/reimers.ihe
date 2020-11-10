@@ -81,7 +81,8 @@ namespace Reimers.Ihe.Communication
                 parser ?? new PipeParser(),
                 encoding ?? Encoding.ASCII,
                 middleware);
-            var stream = tcpClient.GetStream();
+            Stream stream = tcpClient.GetStream();
+
             if (serverCertificate != null)
             {
                 var ssl = new SslStream(
@@ -181,9 +182,10 @@ namespace Reimers.Ihe.Communication
                 .ConfigureAwait(false);
 
             cancellationToken.ThrowIfCancellationRequested();
-            var resultMsg = _parser.Encode(result);
+            string resultMsg = _parser.Encode(result);
             await WriteToStream(resultMsg, cancellationToken)
                 .ConfigureAwait(false);
+            await _messageLog.Write(resultMsg);
         }
 
         private async Task WriteToStream(
@@ -193,7 +195,8 @@ namespace Reimers.Ihe.Communication
             await _asyncLock.WaitAsync(cancellationToken);
             await _messageLog.Write(response).ConfigureAwait(false);
             var bytes = _encoding.GetBytes(response);
-            var buffer = ArrayPool<byte>.Shared.Rent(bytes.Length + 3);
+            var count = bytes.Length + 3;
+            var buffer = ArrayPool<byte>.Shared.Rent(count);
             Constants.StartBlock.CopyTo(buffer, 0);
             bytes.CopyTo(buffer, 1);
             Constants.EndBlock.CopyTo(buffer, bytes.Length + 1);
@@ -201,7 +204,7 @@ namespace Reimers.Ihe.Communication
             await _stream.WriteAsync(
                     buffer,
                     0,
-                    bytes.Length + 3,
+                    count,
                     cancellationToken)
                 .ConfigureAwait(false);
 

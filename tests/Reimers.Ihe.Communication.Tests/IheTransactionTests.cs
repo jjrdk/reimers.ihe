@@ -42,6 +42,21 @@ namespace Reimers.Ihe.Communication.Tests
         }
 
         [Fact]
+        public async Task WhenSendingUpdateMessageThenIncludesObserver()
+        {
+            IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
+            var client = await MllpClient.Create(IPAddress.Loopback.ToString(), Port);
+            var request = new SSU_U03();
+            request.MSH.MessageControlID.Value = generator.NextId();
+            var container = request.AddSPECIMEN_CONTAINER();
+            var obx = container.AddOBX();
+            var observer = obx.GetResponsibleObserver(0);
+            observer.IDNumber.Value = "operatorId";
+            var response = await client.Send(request).ConfigureAwait(false);
+            Assert.NotNull(response);
+        }
+
+        [Fact]
         public async Task WhenSendingMessageThenGetsAck()
         {
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;

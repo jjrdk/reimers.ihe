@@ -25,7 +25,6 @@ namespace Reimers.Ihe.Communication
     using System.Threading;
     using System.Threading.Tasks;
     using NHapi.Base.Model;
-    using NHapi.Base.Parser;
 
     /// <summary>
     /// Defines the public interface for middleware for handling HL7 messages.

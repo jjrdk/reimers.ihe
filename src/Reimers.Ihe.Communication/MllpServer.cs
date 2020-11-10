@@ -57,6 +57,7 @@ namespace Reimers.Ihe.Communication
         /// <param name="endPoint">The <see cref="IPEndPoint"/> the server will listen on.</param>
         /// <param name="messageLog">The <see cref="IMessageLog"/> to use for logging incoming messages.</param>
         /// <param name="middleware">The message handling middleware.</param>
+        /// <param name="cleanupInterval">The interval between cleaning up client connections.</param>
         /// <param name="parser">The <see cref="PipeParser"/> to use for parsing and encoding.</param>
         /// <param name="encoding">The <see cref="Encoding"/> to use for network transfers.</param>
         /// <param name="serverCertificate">The certificates to use for secure connections.</param>
@@ -65,6 +66,7 @@ namespace Reimers.Ihe.Communication
             IPEndPoint endPoint,
             IMessageLog messageLog,
             IHl7MessageMiddleware middleware,
+            TimeSpan cleanupInterval = default,
             PipeParser? parser = null,
             Encoding? encoding = null,
             X509Certificate? serverCertificate = null,
@@ -77,11 +79,14 @@ namespace Reimers.Ihe.Communication
             _serverCertificate = serverCertificate;
             _userCertificateValidationCallback = userCertificateValidationCallback;
             _listener = new TcpListener(endPoint);
+            cleanupInterval = cleanupInterval == default
+                ? TimeSpan.FromSeconds(5)
+                : cleanupInterval;
             _timer = new Timer(
                 CleanConnections,
                 null,
-                TimeSpan.FromSeconds(5),
-                TimeSpan.FromSeconds(5));
+                cleanupInterval,
+                cleanupInterval);
         }
 
         /// <summary>
@@ -100,15 +105,11 @@ namespace Reimers.Ihe.Communication
             _tokenSource.Dispose();
             _listener.Stop();
             _timer.Dispose();
-            lock (_connections)
+            foreach (var connection in _connections)
             {
-                foreach (var connection in _connections)
-                {
-                    connection.Dispose();
-                }
-
-                _connections.Clear();
+                connection.Dispose();
             }
+            CleanConnections(null);
         }
 
         private async Task Read()
@@ -140,7 +141,7 @@ namespace Reimers.Ihe.Communication
             }
         }
 
-        private void CleanConnections(object o)
+        private void CleanConnections(object? o)
         {
             MllpHost[] temp;
             lock (_connections)

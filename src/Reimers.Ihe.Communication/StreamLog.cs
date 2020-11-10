@@ -24,7 +24,7 @@ namespace Reimers.Ihe.Communication
 	using System.Text;
 	using System.Threading.Tasks;
 
-	/// <summary>
+    /// <summary>
 	/// Defines a log implementation which outputs to a <see cref="Stream"/>.
 	/// </summary>
 	public class StreamLog : IMessageLog

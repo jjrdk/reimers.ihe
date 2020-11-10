@@ -2,9 +2,7 @@
 {
     using System;
     using System.Net;
-    using System.Text;
     using System.Threading.Tasks;
-    using NHapi.Base.Parser;
     using NHapi.Model.V251.Message;
     using Xunit;
 
@@ -19,8 +17,7 @@
                 NullLog.Get(),
                 new DefaultHl7MessageMiddleware(
                     handlers: new TestTransactionHandler()),
-                new PipeParser(),
-                Encoding.ASCII);
+                TimeSpan.FromMilliseconds(100));
             _server.Start();
         }
 
@@ -28,13 +25,10 @@
         public async Task WhenClientSendsMessageToServerThenReceivesResponse()
         {
             var address = IPAddress.IPv6Loopback.ToString();
-            var client = await MllpClient.Create(
-                    address,
-                    2575,
-                    NullLog.Get(),
-                    new PipeParser(),
-                    Encoding.ASCII)
-                .ConfigureAwait(false);
+            using var client = await MllpClient.Create(
+                     address,
+                     2575)
+                 .ConfigureAwait(false);
             var adt = new ADT_A01();
             adt.MSH.MessageControlID.Value =
                 DefaultMessageControlIdGenerator.Instance.NextId();

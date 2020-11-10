@@ -20,18 +20,18 @@
 
 namespace Reimers.Ihe.Communication
 {
-	using System.Threading.Tasks;
+    using System.Threading.Tasks;
 
     /// <summary>
 	/// Defines the public interface for an HL7 message log.
 	/// </summary>
 	public interface IMessageLog
-	{
-		/// <summary>
-		/// Writes the passed message to the log.
-		/// </summary>
-		/// <param name="msg"></param>
-		/// <returns></returns>
-		Task Write(string msg);
-	}
+    {
+        /// <summary>
+        /// Writes the passed message to the log.
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <returns></returns>
+        Task Write(string msg);
+    }
 }

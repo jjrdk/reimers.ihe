@@ -42,17 +42,27 @@ namespace Reimers.Ihe.Communication
     public class MllpClient : IHostConnection
     {
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
-        private readonly Dictionary<string, TaskCompletionSource<Hl7Message>> _messages = new Dictionary<string, TaskCompletionSource<Hl7Message>>();
+
+        private readonly Dictionary<string, TaskCompletionSource<Hl7Message>>
+            _messages =
+                new Dictionary<string, TaskCompletionSource<Hl7Message>>();
+
         private readonly string _address;
         private readonly int _port;
         private readonly IMessageLog _messageLog;
         private readonly PipeParser _parser;
         private readonly Encoding _encoding;
         private readonly X509CertificateCollection? _clientCertificates;
-        private readonly RemoteCertificateValidationCallback? _userCertificateValidationCallback;
+
+        private readonly RemoteCertificateValidationCallback?
+            _userCertificateValidationCallback;
+
         private string _remoteAddress = null!;
         private Stream _stream = null!;
-        private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
+
+        private readonly CancellationTokenSource _tokenSource =
+            new CancellationTokenSource();
+
         private TcpClient _tcpClient = null!;
 #pragma warning disable IDE0052 // Remove unread private members
         private Task _readThread = null!;
@@ -65,7 +75,8 @@ namespace Reimers.Ihe.Communication
             PipeParser parser,
             Encoding encoding,
             X509CertificateCollection? clientCertificates,
-            RemoteCertificateValidationCallback? userCertificateValidationCallback)
+            RemoteCertificateValidationCallback?
+                userCertificateValidationCallback)
         {
             _address = address;
             _port = port;
@@ -119,7 +130,7 @@ namespace Reimers.Ihe.Communication
         public async Task<Hl7Message> Send<TMessage>(
             TMessage message,
             CancellationToken cancellationToken = default)
-        where TMessage : IMessage
+            where TMessage : IMessage
         {
             await _semaphore.WaitAsync(cancellationToken);
 
@@ -164,6 +175,7 @@ namespace Reimers.Ihe.Communication
             _tcpClient = new TcpClient(_address, _port);
             _remoteAddress = _tcpClient.Client.RemoteEndPoint.ToString();
             _stream = _tcpClient.GetStream();
+
             if (_clientCertificates != null)
             {
                 var ssl = new SslStream(
@@ -228,10 +240,11 @@ namespace Reimers.Ihe.Communication
                             foreach (var completionSource in _messages.Values)
                             {
                                 completionSource.SetException(
-                                   new Exception(
-                                       $"Unexpected character: {current:x2}"));
+                                    new Exception(
+                                        $"Unexpected character: {current:x2}"));
 
                             }
+
                             _messages.Clear();
                         }
                     }
@@ -252,6 +265,7 @@ namespace Reimers.Ihe.Communication
                         completionSource.SetException(io);
 
                     }
+
                     _messages.Clear();
                 }
             }
