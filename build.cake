@@ -1,11 +1,11 @@
-#tool nuget:?package=GitVersion.CommandLine&version=5.0.1
+#tool nuget:?package=GitVersion.CommandLine&version=5.5.0
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
 //////////////////////////////////////////////////////////////////////
 
-var target = Argument("target", "Default");
-var configuration = Argument("configuration", "Release");
+var target = Argument<string>("target", "Default");
+var configuration = Argument<string>("configuration", "Release");
 
 //////////////////////////////////////////////////////////////////////
 // PREPARATION
@@ -48,10 +48,17 @@ Task("Clean")
 .IsDependentOn("Version")
     .Does(() =>
 {
-    CleanDirectories(buildDir + "/src/**/bin/" + configuration);
-    CleanDirectories(buildDir + "/tests/**/bin/" + configuration);
-    CleanDirectories(buildDir + "/src/**/obj/" + configuration);
-    CleanDirectories(buildDir + "/tests/**/obj/" + configuration);
+    Information("Cleaning: " + buildDir + "/src/**/bin");
+    CleanDirectories(buildDir + "/src/**/bin");
+    
+    Information("Cleaning: " + buildDir + "/tests/**/bin");
+    CleanDirectories(buildDir + "/tests/**/bin");
+    
+    Information("Cleaning: " + buildDir + "/src/**/obj");
+    CleanDirectories(buildDir + "/src/**/obj");
+    
+    Information("Cleaning: " + buildDir + "/tests/**/obj");
+    CleanDirectories(buildDir + "/tests/**/obj");
 });
 
 Task("Restore-NuGet-Packages")
@@ -122,8 +129,8 @@ Task("Pack")
         var packSettings = new DotNetCorePackSettings
         {
             Configuration = configuration,
-            NoBuild = true,
-            NoRestore = true,
+            NoBuild = false,
+            NoRestore = false,
             OutputDirectory = "./artifacts/packages",
             IncludeSymbols = true,
             MSBuildSettings = new DotNetCoreMSBuildSettings().SetConfiguration(configuration).SetVersion(buildVersion)
