@@ -63,7 +63,6 @@ namespace Reimers.Ihe.Communication.Http.Tests
                 new[] {Encoding.BigEndianUnicode},
                 new[] {Encoding.Default},
                 new[] {Encoding.UTF32},
-                new[] {Encoding.UTF7},
                 new[] {Encoding.UTF8},
                 new[] {Encoding.Unicode}
             };
@@ -73,6 +72,7 @@ namespace Reimers.Ihe.Communication.Http.Tests
         public void Dispose()
         {
             _server?.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

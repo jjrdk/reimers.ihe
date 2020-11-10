@@ -2,13 +2,14 @@
 	<PropertyGroup>
 		<RootNamespace>Reimers.Ihe.Communication.Http</RootNamespace>
 		<PackageId>Reimers.Ihe.Communication.Http</PackageId>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
 		<Title>Reimers.Ihe.Communication.Http</Title>
 		<Description>Classes to handle HTTP connections and IHE transactions.</Description>
 		<PackageTags>HL7 IHE</PackageTags>
 		<PackageReleaseNotes>Update to net standard 2.0.</PackageReleaseNotes>
 		<AssemblyName>reimers.ihe.communication.http</AssemblyName>
-		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Reimers.Ihe.Communication.xml</DocumentationFile>
+        <DocumentationFile Condition=" '$(TargetFramework)' == 'net5.0' ">bin\$(Configuration)\net5.0\Reimers.Ihe.Communication.xml</DocumentationFile>
+        <DocumentationFile Condition=" '$(TargetFramework)' == 'netstandard2.0' ">bin\$(Configuration)\netstandard2.0\Reimers.Ihe.Communication.xml</DocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
