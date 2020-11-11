@@ -3,12 +3,11 @@
 	<PropertyGroup>
 		<PackageId>Reimers.Ihe.Communication</PackageId>
 		<Title>Reimers.Ihe.Communication</Title>
-		<TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0</TargetFrameworks>
 		<Description>Classes to handle MLLP connections and IHE transactions.</Description>
 		<PackageTags>HL7 IHE MLLP</PackageTags>
 		<PackageReleaseNotes>Update to net standard 2.0.</PackageReleaseNotes>
-		<DocumentationFile Condition=" '$(TargetFramework)' == 'net5.0' ">bin\$(Configuration)\net5.0\Reimers.Ihe.Communication.xml</DocumentationFile>
-		<DocumentationFile Condition=" '$(TargetFramework)' == 'netstandard2.0' ">bin\$(Configuration)\netstandard2.0\Reimers.Ihe.Communication.xml</DocumentationFile>
+		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Reimers.Ihe.Communication.xml</DocumentationFile>
 		<AssemblyName>reimers.ihe.communication</AssemblyName>
 	</PropertyGroup>
 
