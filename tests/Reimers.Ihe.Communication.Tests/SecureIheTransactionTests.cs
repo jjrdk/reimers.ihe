@@ -64,7 +64,7 @@ namespace Reimers.Ihe.Communication.Tests
                 _port,
                 clientCertificates: _cert,
                 userCertificateValidationCallback:
-                UserCertificateValidationCallback);
+                UserCertificateValidationCallback).ConfigureAwait(false);
             var request = new QBP_Q11();
             request.MSH.MessageControlID.Value = "test";
             var response = await client.Send(request).ConfigureAwait(false);
@@ -74,6 +74,7 @@ namespace Reimers.Ihe.Communication.Tests
         /// <inheritdoc />
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
             _server?.Dispose();
         }
     }

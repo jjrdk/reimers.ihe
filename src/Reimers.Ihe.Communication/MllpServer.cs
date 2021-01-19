@@ -43,6 +43,7 @@ namespace Reimers.Ihe.Communication
         private readonly Encoding _encoding;
         private readonly X509Certificate? _serverCertificate;
         private readonly RemoteCertificateValidationCallback? _userCertificateValidationCallback;
+        private readonly int _bufferSize;
         private readonly TcpListener _listener;
         private readonly List<MllpHost> _connections = new List<MllpHost>();
         private readonly Timer _timer;
@@ -70,7 +71,8 @@ namespace Reimers.Ihe.Communication
             PipeParser? parser = null,
             Encoding? encoding = null,
             X509Certificate? serverCertificate = null,
-            RemoteCertificateValidationCallback? userCertificateValidationCallback = null)
+            RemoteCertificateValidationCallback? userCertificateValidationCallback = null,
+           int bufferSize = 4096)
         {
             _messageLog = messageLog;
             _middleware = middleware;
@@ -78,6 +80,7 @@ namespace Reimers.Ihe.Communication
             _encoding = encoding ?? Encoding.ASCII;
             _serverCertificate = serverCertificate;
             _userCertificateValidationCallback = userCertificateValidationCallback;
+            _bufferSize = bufferSize;
             _listener = new TcpListener(endPoint);
             cleanupInterval = cleanupInterval == default
                 ? TimeSpan.FromSeconds(5)

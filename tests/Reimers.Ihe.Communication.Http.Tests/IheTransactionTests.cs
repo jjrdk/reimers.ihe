@@ -49,7 +49,7 @@ namespace Reimers.Ihe.Communication.Http.Tests
                 new PipeParser(),
                 encoding,
                 httpClientHandlerFactory: _server.CreateClientHandler);
-            var client = await connectionFactory.Get();
+            var client = await connectionFactory.Get().ConfigureAwait(false);
             var request = new QBP_Q11();
             var response = await client.Send(request).ConfigureAwait(false);
             Assert.NotNull(response);

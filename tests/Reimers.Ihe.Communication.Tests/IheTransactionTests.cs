@@ -37,7 +37,8 @@ namespace Reimers.Ihe.Communication.Tests
             _server = new MllpServer(
                 new IPEndPoint(IPAddress.Loopback, Port),
                 NullLog.Get(),
-                new TestMiddleware());
+                new TestMiddleware(),
+                bufferSize: 30);
             _server.Start();
         }
 
@@ -45,7 +46,7 @@ namespace Reimers.Ihe.Communication.Tests
         public async Task WhenSendingUpdateMessageThenIncludesObserver()
         {
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
-            var client = await MllpClient.Create(IPAddress.Loopback.ToString(), Port);
+            var client = await MllpClient.Create(IPAddress.Loopback.ToString(), Port).ConfigureAwait(false);
             var request = new SSU_U03();
             request.MSH.MessageControlID.Value = generator.NextId();
             var container = request.AddSPECIMEN_CONTAINER();
@@ -60,7 +61,7 @@ namespace Reimers.Ihe.Communication.Tests
         public async Task WhenSendingMessageThenGetsAck()
         {
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
-            var client = await MllpClient.Create(IPAddress.Loopback.ToString(), Port);
+            var client = await MllpClient.Create(IPAddress.Loopback.ToString(), Port, bufferSize: 30).ConfigureAwait(false);
             var request = new QBP_Q11();
             request.MSH.MessageControlID.Value = generator.NextId();
             var response = await client.Send(request).ConfigureAwait(false);
@@ -72,13 +73,13 @@ namespace Reimers.Ihe.Communication.Tests
         {
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
 
-            var tasks = Enumerable.Repeat(false, 10)
+            var tasks = Enumerable.Repeat(false, 3)
                     .Select(
                         async _ =>
                         {
                             using var client = await MllpClient.Create(
                                 IPAddress.Loopback.ToString(),
-                                Port);
+                                Port).ConfigureAwait(false);
                             var request = new QBP_Q11();
                             request.MSH.MessageControlID.Value = generator.NextId();
                             var response =
@@ -97,9 +98,10 @@ namespace Reimers.Ihe.Communication.Tests
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
             using var client = await MllpClient.Create(
                 IPAddress.Loopback.ToString(),
-                Port);
+                Port,
+                bufferSize: 30).ConfigureAwait(false);
 
-            var tasks = Enumerable.Repeat(false, 100)
+            var tasks = Enumerable.Repeat(false, 10)
                     .Select(
                         async _ =>
                         {
@@ -118,6 +120,7 @@ namespace Reimers.Ihe.Communication.Tests
         /// <inheritdoc />
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
             _server?.Dispose();
         }
     }

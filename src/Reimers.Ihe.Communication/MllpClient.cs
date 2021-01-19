@@ -41,11 +41,10 @@ namespace Reimers.Ihe.Communication
     /// </summary>
     public class MllpClient : IHostConnection
     {
-        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim _semaphore = new(1, 1);
 
         private readonly Dictionary<string, TaskCompletionSource<Hl7Message>>
-            _messages =
-                new Dictionary<string, TaskCompletionSource<Hl7Message>>();
+            _messages = new();
 
         private readonly string _address;
         private readonly int _port;
@@ -57,12 +56,10 @@ namespace Reimers.Ihe.Communication
         private readonly RemoteCertificateValidationCallback?
             _userCertificateValidationCallback;
 
+        private readonly int _bufferSize;
         private string _remoteAddress = null!;
         private Stream _stream = null!;
-
-        private readonly CancellationTokenSource _tokenSource =
-            new CancellationTokenSource();
-
+        private readonly CancellationTokenSource _tokenSource = new();
         private TcpClient _tcpClient = null!;
 #pragma warning disable IDE0052 // Remove unread private members
         private Task _readThread = null!;
@@ -75,8 +72,8 @@ namespace Reimers.Ihe.Communication
             PipeParser parser,
             Encoding encoding,
             X509CertificateCollection? clientCertificates,
-            RemoteCertificateValidationCallback?
-                userCertificateValidationCallback)
+            RemoteCertificateValidationCallback? userCertificateValidationCallback,
+            int bufferSize)
         {
             _address = address;
             _port = port;
@@ -86,6 +83,7 @@ namespace Reimers.Ihe.Communication
             _clientCertificates = clientCertificates;
             _userCertificateValidationCallback =
                 userCertificateValidationCallback;
+            _bufferSize = bufferSize;
         }
 
         /// <summary>
@@ -98,6 +96,7 @@ namespace Reimers.Ihe.Communication
         /// <param name="encoding"></param>
         /// <param name="clientCertificates"></param>
         /// <param name="userCertificateValidationCallback"></param>
+        /// <param name="bufferSize"></param>
         /// <returns></returns>
         public static async Task<IHostConnection> Create(
             string address,
@@ -107,7 +106,8 @@ namespace Reimers.Ihe.Communication
             Encoding? encoding = null,
             X509CertificateCollection? clientCertificates = null,
             RemoteCertificateValidationCallback?
-                userCertificateValidationCallback = null)
+                userCertificateValidationCallback = null,
+            int bufferSize = 4096)
         {
             var instance = new MllpClient(
                 address,
@@ -116,7 +116,8 @@ namespace Reimers.Ihe.Communication
                 parser ?? new PipeParser(),
                 encoding ?? Encoding.ASCII,
                 clientCertificates,
-                userCertificateValidationCallback);
+                userCertificateValidationCallback,
+                bufferSize);
             await instance.Setup().ConfigureAwait(false);
             return instance;
         }
@@ -132,7 +133,7 @@ namespace Reimers.Ihe.Communication
             CancellationToken cancellationToken = default)
             where TMessage : IMessage
         {
-            await _semaphore.WaitAsync(cancellationToken);
+            await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             var hl7 = _parser.Encode(message);
             var bytes = _encoding.GetBytes(hl7);
@@ -197,12 +198,12 @@ namespace Reimers.Ihe.Communication
         /// <inheritdoc />
         public void Dispose()
         {
-            _tcpClient.Close();
-            _tcpClient.Dispose();
             _tokenSource.Cancel();
             _tokenSource.Dispose();
             _stream.Close();
             _stream.Dispose();
+            _tcpClient.Close();
+            _tcpClient.Dispose();
         }
 
         private async Task ReadStream(CancellationToken cancellationToken)
@@ -210,49 +211,27 @@ namespace Reimers.Ihe.Communication
             await Task.Yield();
             try
             {
-                byte previous = 0;
                 var messageBuilder = new List<byte>();
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    var current = (byte)_stream.ReadByte();
-
-                    cancellationToken.ThrowIfCancellationRequested();
-                    if (Constants.EndBlock.SequenceEqual(
-                        new[] { previous, current }))
+                    var index = 0;
+                    var buffer = ArrayPool<byte>.Shared.Rent(_bufferSize);
+                    var read = await _stream.ReadAsync(
+                            buffer,
+                            0,
+                            _bufferSize,
+                            cancellationToken)
+                        .ConfigureAwait(false);
+                    while (index > -1)
                     {
-                        messageBuilder.RemoveAt(messageBuilder.Count - 1);
-                        var s = _encoding.GetString(messageBuilder.ToArray());
-                        messageBuilder.Clear();
-                        previous = 0;
-                        var msg = _parser.Parse(s);
-                        var message = new Hl7Message(msg, _remoteAddress);
-                        var controlId = msg.GetMessageControlId();
-                        var completionSource = _messages[controlId];
-                        _messages.Remove(controlId);
-                        completionSource.SetResult(message);
-                        continue;
+                        index = Process(
+                            buffer,
+                            index,
+                            messageBuilder,
+                            read - index);
                     }
 
-                    if (previous == 0 && current == 11)
-                    {
-                        if (messageBuilder.Count > 0)
-                        {
-                            foreach (var completionSource in _messages.Values)
-                            {
-                                completionSource.SetException(
-                                    new Exception(
-                                        $"Unexpected character: {current:x2}"));
-
-                            }
-
-                            _messages.Clear();
-                        }
-                    }
-                    else
-                    {
-                        messageBuilder.Add(current);
-                        previous = current;
-                    }
+                    ArrayPool<byte>.Shared.Return(buffer);
                 }
             }
             catch (IOException io)
@@ -263,12 +242,65 @@ namespace Reimers.Ihe.Communication
                     foreach (var completionSource in _messages.Values)
                     {
                         completionSource.SetException(io);
-
                     }
 
                     _messages.Clear();
                 }
             }
+        }
+
+        private int Process(
+            byte[] buffer,
+            int index,
+            List<byte> messageBuilder,
+            int read)
+        {
+            var isStart = buffer[index] == 11;
+            if (isStart)
+            {
+                if (messageBuilder.Count > 0)
+                {
+                    foreach (var completionSource in _messages.Values)
+                    {
+                        completionSource.SetException(
+                            new Exception(
+                                $"Unexpected character: {buffer[index]:x2}"));
+                    }
+
+                    _messages.Clear();
+                }
+            }
+
+            var endblockStart = Array.IndexOf(
+                buffer,
+                Constants.EndBlock[0],
+                index,
+                read);
+            var endblockEnd = endblockStart + 1;
+            var bytes = buffer.Skip(index).Take(endblockStart > -1 ? endblockStart - index : read);
+            if (isStart)
+            {
+                bytes = bytes.Skip(1);
+            }
+
+            if (buffer[endblockEnd] == Constants.EndBlock[1])
+            {
+                messageBuilder.AddRange(bytes);
+                var s = _encoding.GetString(messageBuilder.ToArray());
+                messageBuilder.Clear();
+                var msg = _parser.Parse(s);
+                var message = new Hl7Message(msg, _remoteAddress);
+                var controlId = msg.GetMessageControlId();
+                var completionSource = _messages[controlId];
+                _messages.Remove(controlId);
+                completionSource.SetResult(message);
+            }
+            else
+            {
+                messageBuilder.AddRange(bytes);
+            }
+
+            return endblockStart == -1 ? -1 : Array.IndexOf(buffer, Constants.StartBlock[0], endblockEnd);
         }
     }
 }

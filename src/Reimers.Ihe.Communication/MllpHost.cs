@@ -42,6 +42,7 @@ namespace Reimers.Ihe.Communication
         private readonly PipeParser _parser;
         private readonly Encoding _encoding;
         private readonly IHl7MessageMiddleware _middleware;
+        private readonly int _bufferSize;
         private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
         private readonly SemaphoreSlim _asyncLock = new SemaphoreSlim(1, 1);
         private Stream _stream = null!;
@@ -54,13 +55,15 @@ namespace Reimers.Ihe.Communication
             IMessageLog messageLog,
             PipeParser parser,
             Encoding encoding,
-            IHl7MessageMiddleware middleware)
+            IHl7MessageMiddleware middleware,
+            int bufferSize)
         {
             _client = client;
             _messageLog = messageLog;
             _parser = parser;
             _encoding = encoding;
             _middleware = middleware;
+            _bufferSize = bufferSize;
         }
 
         public bool IsConnected => _client.Connected;
@@ -73,14 +76,16 @@ namespace Reimers.Ihe.Communication
             Encoding? encoding = null,
             X509Certificate? serverCertificate = null,
             RemoteCertificateValidationCallback?
-                userCertificateValidationCallback = null)
+                userCertificateValidationCallback = null,
+            int bufferSize = 4096)
         {
             var host = new MllpHost(
                 tcpClient,
                 messageLog,
                 parser ?? new PipeParser(),
                 encoding ?? Encoding.ASCII,
-                middleware);
+                middleware,
+                bufferSize);
             Stream stream = tcpClient.GetStream();
 
             if (serverCertificate != null)
@@ -109,50 +114,86 @@ namespace Reimers.Ihe.Communication
         /// <inheritdoc />
         public void Dispose()
         {
-            _client.Close();
-            _client.Dispose();
             _stream.Close();
             _stream.Dispose();
+            _client.Close();
+            _client.Dispose();
         }
+
+        //private async Task ReadStream(CancellationToken cancellationToken)
+        //{
+        //    await Task.Yield();
+        //    try
+        //    {
+        //        byte previous = 0;
+        //        var messageBuilder = new List<byte>();
+        //        while (true)
+        //        {
+        //            cancellationToken.ThrowIfCancellationRequested();
+        //            var current = (byte)_stream.ReadByte();
+        //            if (Constants.EndBlock.SequenceEqual(
+        //                new[] { previous, current }))
+        //            {
+        //                messageBuilder.RemoveAt(messageBuilder.Count - 1);
+        //                _ = SendResponse(
+        //                        messageBuilder.ToArray(),
+        //                        cancellationToken)
+        //                    .ConfigureAwait(false);
+        //                messageBuilder.Clear();
+        //                previous = 0;
+        //                continue;
+        //            }
+
+        //            if (previous == 0 && current == 11)
+        //            {
+        //                if (messageBuilder.Count > 0)
+        //                {
+        //                    throw new Exception(
+        //                        "Unexpected character: "
+        //                        + current.ToString("x2"));
+        //                } // Start char received.
+        //            }
+        //            else
+        //            {
+        //                messageBuilder.Add(current);
+        //                previous = current;
+        //            }
+        //        }
+        //    }
+        //    catch (IOException io)
+        //    {
+        //        var msg = io.Message;
+        //        Trace.TraceInformation(msg);
+        //    }
+        //    finally
+        //    {
+        //        _client.Close();
+        //        _client.Dispose();
+        //    }
+        //}
 
         private async Task ReadStream(CancellationToken cancellationToken)
         {
             await Task.Yield();
             try
             {
-                byte previous = 0;
                 var messageBuilder = new List<byte>();
-                while (true)
+                while (!cancellationToken.IsCancellationRequested)
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    var current = (byte)_stream.ReadByte();
-                    if (Constants.EndBlock.SequenceEqual(
-                        new[] { previous, current }))
+                    var index = 0;
+                    var buffer = ArrayPool<byte>.Shared.Rent(_bufferSize);
+                    var read = await _stream.ReadAsync(buffer, 0, _bufferSize, cancellationToken)
+                        .ConfigureAwait(false);
+                    while (index > -1)
                     {
-                        messageBuilder.RemoveAt(messageBuilder.Count - 1);
-                        _ = SendResponse(
-                                messageBuilder.ToArray(),
-                                cancellationToken)
-                            .ConfigureAwait(false);
-                        messageBuilder.Clear();
-                        previous = 0;
-                        continue;
+                        index = Process(
+                            buffer,
+                            index,
+                            messageBuilder,
+                            read - index,
+                            cancellationToken);
                     }
-
-                    if (previous == 0 && current == 11)
-                    {
-                        if (messageBuilder.Count > 0)
-                        {
-                            throw new Exception(
-                                "Unexpected character: "
-                                + current.ToString("x2"));
-                        } // Start char received.
-                    }
-                    else
-                    {
-                        messageBuilder.Add(current);
-                        previous = current;
-                    }
+                    ArrayPool<byte>.Shared.Return(buffer);
                 }
             }
             catch (IOException io)
@@ -165,6 +206,46 @@ namespace Reimers.Ihe.Communication
                 _client.Close();
                 _client.Dispose();
             }
+        }
+
+        private int Process(byte[] buffer, int index, List<byte> messageBuilder, int read, CancellationToken cancellationToken)
+        {
+            var isStart = buffer[index] == 11;
+            if (isStart)
+            {
+                if (messageBuilder.Count > 0)
+                {
+                    throw new Exception(
+                        "Unexpected character: "
+                        + buffer[index].ToString("x2"));
+                }
+            }
+
+            var endblockStart = Array.IndexOf(
+                buffer,
+                Constants.EndBlock[0],
+                index,
+                read);
+            var endblockEnd = endblockStart + 1;
+            var bytes = buffer.Skip(index).Take(endblockStart > -1 ? endblockStart - index : read);
+            if (isStart)
+            {
+                bytes = bytes.Skip(1);
+            }
+
+            if (buffer[endblockEnd] == Constants.EndBlock[1])
+            {
+                messageBuilder.AddRange(bytes);
+                _ = SendResponse(messageBuilder.ToArray(), cancellationToken)
+                    .ConfigureAwait(false);
+                messageBuilder.Clear();
+            }
+            else
+            {
+                messageBuilder.AddRange(bytes);
+            }
+
+            return endblockStart == -1 ? -1 : Array.IndexOf(buffer, Constants.StartBlock[0], endblockEnd);
         }
 
         private async Task SendResponse(
@@ -185,14 +266,14 @@ namespace Reimers.Ihe.Communication
             string resultMsg = _parser.Encode(result);
             await WriteToStream(resultMsg, cancellationToken)
                 .ConfigureAwait(false);
-            await _messageLog.Write(resultMsg);
+            await _messageLog.Write(resultMsg).ConfigureAwait(false);
         }
 
         private async Task WriteToStream(
             string response,
             CancellationToken cancellationToken)
         {
-            await _asyncLock.WaitAsync(cancellationToken);
+            await _asyncLock.WaitAsync(cancellationToken).ConfigureAwait(false);
             await _messageLog.Write(response).ConfigureAwait(false);
             var bytes = _encoding.GetBytes(response);
             var count = bytes.Length + 3;
