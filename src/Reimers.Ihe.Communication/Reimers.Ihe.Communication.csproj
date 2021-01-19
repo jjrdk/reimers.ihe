@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<PackageId>Reimers.Ihe.Communication</PackageId>
 		<Title>Reimers.Ihe.Communication</Title>
-		<TargetFrameworks>netstandard2.0</TargetFrameworks>
+		<TargetFramework>netstandard2.0</TargetFramework>
 		<Description>Classes to handle MLLP connections and IHE transactions.</Description>
 		<PackageTags>HL7 IHE MLLP</PackageTags>
 		<PackageReleaseNotes>Update to net standard 2.0.</PackageReleaseNotes>

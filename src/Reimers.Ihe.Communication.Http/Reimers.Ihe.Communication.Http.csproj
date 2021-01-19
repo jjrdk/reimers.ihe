@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<RootNamespace>Reimers.Ihe.Communication.Http</RootNamespace>
 		<PackageId>Reimers.Ihe.Communication.Http</PackageId>
-		<TargetFrameworks>netstandard2.0</TargetFrameworks>
+		<TargetFramework>netstandard2.0</TargetFramework>
 		<Title>Reimers.Ihe.Communication.Http</Title>
 		<Description>Classes to handle HTTP connections and IHE transactions.</Description>
 		<PackageTags>HL7 IHE</PackageTags>
