@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <CurrentVersion>2.1.0</CurrentVersion>
+        <CurrentVersion>3.0.0</CurrentVersion>
         <Version>$(CurrentVersion)</Version>
         <Authors>Jacob Reimers</Authors>
         <Owners>Jacob Reimers</Owners>
