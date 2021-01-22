@@ -87,6 +87,7 @@ namespace Reimers.Ihe.Communication.Http.Tests
 
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
             _server.Dispose();
         }
     }

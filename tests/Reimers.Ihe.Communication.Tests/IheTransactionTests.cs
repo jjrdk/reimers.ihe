@@ -37,8 +37,7 @@ namespace Reimers.Ihe.Communication.Tests
             _server = new MllpServer(
                 new IPEndPoint(IPAddress.Loopback, Port),
                 NullLog.Get(),
-                new TestMiddleware(),
-                bufferSize: 30);
+                new TestMiddleware());
             _server.Start();
         }
 
@@ -73,18 +72,18 @@ namespace Reimers.Ihe.Communication.Tests
         {
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
 
-            var tasks = Enumerable.Repeat(false, 3)
+            var tasks = Enumerable.Repeat(false, 10)
                     .Select(
                         async _ =>
                         {
-                            using var client = await MllpClient.Create(
+                            await using var client = await MllpClient.Create(
                                 IPAddress.Loopback.ToString(),
                                 Port).ConfigureAwait(false);
                             var request = new QBP_Q11();
                             request.MSH.MessageControlID.Value = generator.NextId();
                             var response =
                                 await client.Send(request).ConfigureAwait(false);
-                            return response != null;
+                            return response?.Message is ACK;
                         });
 
             var results = await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -96,12 +95,11 @@ namespace Reimers.Ihe.Communication.Tests
         public async Task WhenSendingMultipleSequentialMessageThenGetsAckForAll()
         {
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
-            using var client = await MllpClient.Create(
+            await using var client = await MllpClient.Create(
                 IPAddress.Loopback.ToString(),
-                Port,
-                bufferSize: 30).ConfigureAwait(false);
+                Port).ConfigureAwait(false);
 
-            var tasks = Enumerable.Repeat(false, 10)
+            var tasks = Enumerable.Repeat(false, 100)
                     .Select(
                         async _ =>
                         {
@@ -121,7 +119,7 @@ namespace Reimers.Ihe.Communication.Tests
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-            _server?.Dispose();
+            _server?.DisposeAsync().AsTask().Wait();
         }
     }
 }

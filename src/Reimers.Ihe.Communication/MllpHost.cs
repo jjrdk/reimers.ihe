@@ -35,7 +35,7 @@ namespace Reimers.Ihe.Communication
     using System.Threading.Tasks;
     using NHapi.Base.Parser;
 
-    internal class MllpHost : IDisposable
+    internal class MllpHost : IAsyncDisposable
     {
         private readonly TcpClient _client;
         private readonly IMessageLog _messageLog;
@@ -112,65 +112,16 @@ namespace Reimers.Ihe.Communication
         }
 
         /// <inheritdoc />
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
+            _tokenSource.Cancel();
+            await _readThread.ConfigureAwait(false);
+            _tokenSource.Dispose();
             _stream.Close();
-            _stream.Dispose();
+            await _stream.DisposeAsync().ConfigureAwait(false);
             _client.Close();
             _client.Dispose();
         }
-
-        //private async Task ReadStream(CancellationToken cancellationToken)
-        //{
-        //    await Task.Yield();
-        //    try
-        //    {
-        //        byte previous = 0;
-        //        var messageBuilder = new List<byte>();
-        //        while (true)
-        //        {
-        //            cancellationToken.ThrowIfCancellationRequested();
-        //            var current = (byte)_stream.ReadByte();
-        //            if (Constants.EndBlock.SequenceEqual(
-        //                new[] { previous, current }))
-        //            {
-        //                messageBuilder.RemoveAt(messageBuilder.Count - 1);
-        //                _ = SendResponse(
-        //                        messageBuilder.ToArray(),
-        //                        cancellationToken)
-        //                    .ConfigureAwait(false);
-        //                messageBuilder.Clear();
-        //                previous = 0;
-        //                continue;
-        //            }
-
-        //            if (previous == 0 && current == 11)
-        //            {
-        //                if (messageBuilder.Count > 0)
-        //                {
-        //                    throw new Exception(
-        //                        "Unexpected character: "
-        //                        + current.ToString("x2"));
-        //                } // Start char received.
-        //            }
-        //            else
-        //            {
-        //                messageBuilder.Add(current);
-        //                previous = current;
-        //            }
-        //        }
-        //    }
-        //    catch (IOException io)
-        //    {
-        //        var msg = io.Message;
-        //        Trace.TraceInformation(msg);
-        //    }
-        //    finally
-        //    {
-        //        _client.Close();
-        //        _client.Dispose();
-        //    }
-        //}
 
         private async Task ReadStream(CancellationToken cancellationToken)
         {
@@ -182,7 +133,7 @@ namespace Reimers.Ihe.Communication
                 {
                     var index = 0;
                     var buffer = ArrayPool<byte>.Shared.Rent(_bufferSize);
-                    var read = await _stream.ReadAsync(buffer, 0, _bufferSize, cancellationToken)
+                    var read = await _stream.ReadAsync(buffer.AsMemory(0, _bufferSize), cancellationToken)
                         .ConfigureAwait(false);
                     while (index > -1)
                     {
@@ -196,6 +147,7 @@ namespace Reimers.Ihe.Communication
                     ArrayPool<byte>.Shared.Return(buffer);
                 }
             }
+            catch (TaskCanceledException) { }
             catch (IOException io)
             {
                 var msg = io.Message;
@@ -210,6 +162,10 @@ namespace Reimers.Ihe.Communication
 
         private int Process(byte[] buffer, int index, List<byte> messageBuilder, int read, CancellationToken cancellationToken)
         {
+            if (read < 0)
+            {
+                return -1;
+            }
             var isStart = buffer[index] == 11;
             if (isStart)
             {
@@ -257,7 +213,7 @@ namespace Reimers.Ihe.Communication
             var received = _parser.Parse(s);
             var message = new Hl7Message(
                 received,
-                _client.Client.RemoteEndPoint.ToString());
+                _client.Client.RemoteEndPoint?.ToString() ?? string.Empty);
             await _messageLog.Write(s).ConfigureAwait(false);
             var result = await _middleware.Handle(message, cancellationToken)
                 .ConfigureAwait(false);
@@ -283,9 +239,9 @@ namespace Reimers.Ihe.Communication
             Constants.EndBlock.CopyTo(buffer, bytes.Length + 1);
 
             await _stream.WriteAsync(
-                    buffer,
+                    buffer.AsMemory(
                     0,
-                    count,
+                    count),
                     cancellationToken)
                 .ConfigureAwait(false);
 

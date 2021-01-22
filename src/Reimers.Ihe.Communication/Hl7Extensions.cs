@@ -16,9 +16,7 @@ namespace Reimers.Ihe.Communication
         public static string GetMessageControlId(this IMessage message)
         {
             var msh = (ISegment)message.GetStructure("MSH");
-            return msh
-                    .GetField(10, 0)
-                    .ToString();
+            return msh.GetField(10, 0).ToString() ?? string.Empty;
         }
     }
 }

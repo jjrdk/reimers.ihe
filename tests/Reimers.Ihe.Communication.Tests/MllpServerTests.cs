@@ -25,7 +25,7 @@
         public async Task WhenClientSendsMessageToServerThenReceivesResponse()
         {
             var address = IPAddress.IPv6Loopback.ToString();
-            using var client = await MllpClient.Create(
+            await using var client = await MllpClient.Create(
                      address,
                      2575)
                  .ConfigureAwait(false);
@@ -42,7 +42,7 @@
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-            _server?.Dispose();
+            _server?.DisposeAsync().AsTask().Wait();
         }
     }
 }

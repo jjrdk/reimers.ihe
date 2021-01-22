@@ -28,7 +28,7 @@ namespace Reimers.Ihe.Communication
     /// <summary>
     /// Defines the interface for a connection to an IHE host.
     /// </summary>
-    public interface IHostConnection : IDisposable
+    public interface IHostConnection : IAsyncDisposable
     {
         /// <summary>
         /// Sends the passed message to the server and awaits the response.
@@ -38,6 +38,7 @@ namespace Reimers.Ihe.Communication
         /// <returns>An <see cref="Hl7Message"/> containing the response and source address.</returns>
         Task<Hl7Message> Send<TMessage>(
             TMessage message,
-            CancellationToken cancellationToken = default) where TMessage : IMessage;
+            CancellationToken cancellationToken = default)
+            where TMessage : IMessage;
     }
 }

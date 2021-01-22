@@ -35,7 +35,7 @@ namespace Reimers.Ihe.Communication
     /// <summary>
     /// Defines an IHE server using MLLP connections.
     /// </summary>
-    public class MllpServer : IDisposable
+    public class MllpServer : IAsyncDisposable
     {
         private readonly IMessageLog _messageLog;
         private readonly IHl7MessageMiddleware _middleware;
@@ -63,6 +63,7 @@ namespace Reimers.Ihe.Communication
         /// <param name="encoding">The <see cref="Encoding"/> to use for network transfers.</param>
         /// <param name="serverCertificate">The certificates to use for secure connections.</param>
         /// <param name="userCertificateValidationCallback">Optional certificate validation callback.</param>
+        /// <param name="bufferSize">Read buffer size.</param>
         public MllpServer(
             IPEndPoint endPoint,
             IMessageLog messageLog,
@@ -71,22 +72,24 @@ namespace Reimers.Ihe.Communication
             PipeParser? parser = null,
             Encoding? encoding = null,
             X509Certificate? serverCertificate = null,
-            RemoteCertificateValidationCallback? userCertificateValidationCallback = null,
-           int bufferSize = 4096)
+            RemoteCertificateValidationCallback?
+                userCertificateValidationCallback = null,
+            int bufferSize = 4096)
         {
             _messageLog = messageLog;
             _middleware = middleware;
             _parser = parser;
             _encoding = encoding ?? Encoding.ASCII;
             _serverCertificate = serverCertificate;
-            _userCertificateValidationCallback = userCertificateValidationCallback;
+            _userCertificateValidationCallback =
+                userCertificateValidationCallback;
             _bufferSize = bufferSize;
             _listener = new TcpListener(endPoint);
             cleanupInterval = cleanupInterval == default
                 ? TimeSpan.FromSeconds(5)
                 : cleanupInterval;
             _timer = new Timer(
-                CleanConnections,
+                async _ => await CleanConnections().ConfigureAwait(false),
                 null,
                 cleanupInterval,
                 cleanupInterval);
@@ -102,17 +105,33 @@ namespace Reimers.Ihe.Communication
         }
 
         /// <inheritdoc />
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
+            _timer.Change(TimeSpan.FromDays(1), TimeSpan.FromDays(1));
             _tokenSource.Cancel();
-            _tokenSource.Dispose();
             _listener.Stop();
-            _timer.Dispose();
-            foreach (var connection in _connections)
+            await _timer.DisposeAsync().ConfigureAwait(false);
+            if (_readTask != null && _readTask.Status != TaskStatus.WaitingForActivation)
             {
-                connection.Dispose();
+                await _readTask.ConfigureAwait(false);
             }
-            CleanConnections(null);
+
+            _tokenSource.Dispose();
+
+            await CleanConnections().ConfigureAwait(false);
+            MllpHost[] hosts;
+            lock (_connections)
+            {
+                hosts = _connections.ToArray();
+            }
+            foreach (var connection in hosts)
+            {
+                try
+                {
+                    await connection.DisposeAsync().ConfigureAwait(false);
+                }
+                catch (OperationCanceledException) { }
+            }
         }
 
         private async Task Read()
@@ -130,21 +149,26 @@ namespace Reimers.Ihe.Communication
                             _parser,
                             _encoding,
                             _serverCertificate,
-                            _userCertificateValidationCallback)
+                            _userCertificateValidationCallback,
+                            _bufferSize)
                         .ConfigureAwait(false);
                     lock (_connections)
                     {
                         _connections.Add(connection);
                     }
                 }
+                catch (SocketException s) when (s.ErrorCode == 995)
+                {
+                    break;
+                }
                 catch (ObjectDisposedException)
                 {
-                    // Ignore
+                    break;
                 }
             }
         }
 
-        private void CleanConnections(object? o)
+        private async ValueTask CleanConnections()
         {
             MllpHost[] temp;
             lock (_connections)
@@ -156,10 +180,18 @@ namespace Reimers.Ihe.Communication
                 }
             }
 
-            foreach (var host in temp)
-            {
-                host.Dispose();
-            }
+            var disposeTasks = temp.Select(
+                async host =>
+                {
+                    try
+                    {
+                        await host.DisposeAsync().ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                    }
+                });
+            await Task.WhenAll(disposeTasks).ConfigureAwait(false);
         }
     }
 }

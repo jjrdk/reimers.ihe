@@ -1,13 +1,13 @@
 <Project>
     <PropertyGroup>
-        <CurrentVersion>2.0.0</CurrentVersion>
+        <CurrentVersion>2.1.0</CurrentVersion>
         <Version>$(CurrentVersion)</Version>
         <Authors>Jacob Reimers</Authors>
         <Owners>Jacob Reimers</Owners>
+        <TargetFrameworks>netstandard2.1;net5.0</TargetFrameworks>
         <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
         <Copyright>Reimers.dk (c) 2016 - 2020</Copyright>
         <Company>Reimers.dk</Company>
-        <TargetFramework>netstandard2.0</TargetFramework>
         <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
         <Product>Reimers IHE</Product>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>

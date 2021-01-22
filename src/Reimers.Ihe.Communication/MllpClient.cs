@@ -164,7 +164,7 @@ namespace Reimers.Ihe.Communication
             var key = message.GetMessageControlId();
             _messages.Add(key, completionSource);
             await _messageLog.Write(hl7).ConfigureAwait(false);
-            await _stream.WriteAsync(buffer, 0, length, cancellationToken)
+            await _stream.WriteAsync(buffer.AsMemory(0, length), cancellationToken)
                 .ConfigureAwait(false);
             ArrayPool<byte>.Shared.Return(buffer);
             _semaphore.Release(1);
@@ -174,7 +174,7 @@ namespace Reimers.Ihe.Communication
         private async Task Setup()
         {
             _tcpClient = new TcpClient(_address, _port);
-            _remoteAddress = _tcpClient.Client.RemoteEndPoint.ToString();
+            _remoteAddress = _tcpClient.Client.RemoteEndPoint?.ToString() ?? string.Empty;
             _stream = _tcpClient.GetStream();
 
             if (_clientCertificates != null)
@@ -196,12 +196,18 @@ namespace Reimers.Ihe.Communication
         }
 
         /// <inheritdoc />
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
             _tokenSource.Cancel();
             _tokenSource.Dispose();
+            try
+            {
+                await _readThread.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) { }
+
             _stream.Close();
-            _stream.Dispose();
+            await _stream.DisposeAsync().ConfigureAwait(false);
             _tcpClient.Close();
             _tcpClient.Dispose();
         }
@@ -217,9 +223,7 @@ namespace Reimers.Ihe.Communication
                     var index = 0;
                     var buffer = ArrayPool<byte>.Shared.Rent(_bufferSize);
                     var read = await _stream.ReadAsync(
-                            buffer,
-                            0,
-                            _bufferSize,
+                            buffer.AsMemory(0, _bufferSize),
                             cancellationToken)
                         .ConfigureAwait(false);
                     while (index > -1)
@@ -255,6 +259,10 @@ namespace Reimers.Ihe.Communication
             List<byte> messageBuilder,
             int read)
         {
+            if (read < 0)
+            {
+                return -1;
+            }
             var isStart = buffer[index] == 11;
             if (isStart)
             {

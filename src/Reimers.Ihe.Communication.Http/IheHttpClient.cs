@@ -49,9 +49,10 @@ namespace Reimers.Ihe.Communication.Http
             _encoding = encoding ?? Encoding.ASCII;
         }
 
-        public void Dispose()
+        public ValueTask DisposeAsync()
         {
             _httpClient.Dispose();
+            return new ValueTask();
         }
 
         public async Task<Hl7Message> Send<TMessage>(

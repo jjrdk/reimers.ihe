@@ -75,7 +75,7 @@ namespace Reimers.Ihe.Communication.Tests
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-            _server?.Dispose();
+            _server?.DisposeAsync().AsTask().Wait();
         }
     }
 }
