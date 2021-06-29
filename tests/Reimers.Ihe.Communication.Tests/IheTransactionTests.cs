@@ -72,7 +72,7 @@ namespace Reimers.Ihe.Communication.Tests
         {
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
 
-            var tasks = Enumerable.Repeat(false, 10)
+            var tasks = Enumerable.Repeat(false, 5)
                     .Select(
                         async _ =>
                         {
