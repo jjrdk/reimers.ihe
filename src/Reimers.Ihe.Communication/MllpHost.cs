@@ -43,12 +43,10 @@ namespace Reimers.Ihe.Communication
         private readonly Encoding _encoding;
         private readonly IHl7MessageMiddleware _middleware;
         private readonly int _bufferSize;
-        private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
-        private readonly SemaphoreSlim _asyncLock = new SemaphoreSlim(1, 1);
+        private readonly CancellationTokenSource _tokenSource = new();
+        private readonly SemaphoreSlim _asyncLock = new(1, 1);
         private Stream _stream = null!;
-#pragma warning disable IDE0052 // Remove unread private members
         private Task _readThread = null!;
-#pragma warning restore IDE0052 // Remove unread private members
 
         private MllpHost(
             TcpClient client,
@@ -121,6 +119,7 @@ namespace Reimers.Ihe.Communication
             await _stream.DisposeAsync().ConfigureAwait(false);
             _client.Close();
             _client.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         private async Task ReadStream(CancellationToken cancellationToken)

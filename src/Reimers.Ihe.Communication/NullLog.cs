@@ -27,7 +27,7 @@ namespace Reimers.Ihe.Communication
 	/// </summary>
 	public class NullLog : IMessageLog
 	{
-		private static readonly NullLog Instance = new NullLog();
+		private static readonly NullLog Instance = new();
 
 		/// <summary>
 		/// Gets an instance of a <see cref="NullLog"/>.

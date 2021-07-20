@@ -61,9 +61,7 @@ namespace Reimers.Ihe.Communication
         private Stream _stream = null!;
         private readonly CancellationTokenSource _tokenSource = new();
         private TcpClient _tcpClient = null!;
-#pragma warning disable IDE0052 // Remove unread private members
         private Task _readThread = null!;
-#pragma warning restore IDE0052 // Remove unread private members
 
         private MllpClient(
             string address,
@@ -72,7 +70,8 @@ namespace Reimers.Ihe.Communication
             PipeParser parser,
             Encoding encoding,
             X509CertificateCollection? clientCertificates,
-            RemoteCertificateValidationCallback? userCertificateValidationCallback,
+            RemoteCertificateValidationCallback?
+                userCertificateValidationCallback,
             int bufferSize)
         {
             _address = address;
@@ -164,7 +163,8 @@ namespace Reimers.Ihe.Communication
             var key = message.GetMessageControlId();
             _messages.Add(key, completionSource);
             await _messageLog.Write(hl7).ConfigureAwait(false);
-            await _stream.WriteAsync(buffer.AsMemory(0, length), cancellationToken)
+            await _stream
+                .WriteAsync(buffer.AsMemory(0, length), cancellationToken)
                 .ConfigureAwait(false);
             ArrayPool<byte>.Shared.Return(buffer);
             _semaphore.Release(1);
@@ -174,7 +174,8 @@ namespace Reimers.Ihe.Communication
         private async Task Setup()
         {
             _tcpClient = new TcpClient(_address, _port);
-            _remoteAddress = _tcpClient.Client.RemoteEndPoint?.ToString() ?? string.Empty;
+            _remoteAddress = _tcpClient.Client.RemoteEndPoint?.ToString()
+                             ?? string.Empty;
             _stream = _tcpClient.GetStream();
 
             if (_clientCertificates != null)
@@ -204,12 +205,15 @@ namespace Reimers.Ihe.Communication
             {
                 await _readThread.ConfigureAwait(false);
             }
-            catch (OperationCanceledException) { }
+            catch (OperationCanceledException)
+            {
+            }
 
             _stream.Close();
             await _stream.DisposeAsync().ConfigureAwait(false);
             _tcpClient.Close();
             _tcpClient.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         private async Task ReadStream(CancellationToken cancellationToken)
@@ -263,6 +267,7 @@ namespace Reimers.Ihe.Communication
             {
                 return -1;
             }
+
             var isStart = buffer[index] == 11;
             if (isStart)
             {
@@ -285,7 +290,8 @@ namespace Reimers.Ihe.Communication
                 index,
                 read);
             var endblockEnd = endblockStart + 1;
-            var bytes = buffer.Skip(index).Take(endblockStart > -1 ? endblockStart - index : read);
+            var bytes = buffer.Skip(index)
+                .Take(endblockStart > -1 ? endblockStart - index : read);
             if (isStart)
             {
                 bytes = bytes.Skip(1);
@@ -308,7 +314,9 @@ namespace Reimers.Ihe.Communication
                 messageBuilder.AddRange(bytes);
             }
 
-            return endblockStart == -1 ? -1 : Array.IndexOf(buffer, Constants.StartBlock[0], endblockEnd);
+            return endblockStart == -1
+                ? -1
+                : Array.IndexOf(buffer, Constants.StartBlock[0], endblockEnd);
         }
     }
 }

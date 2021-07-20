@@ -20,31 +20,39 @@
 
 namespace Reimers.Ihe.Communication
 {
-	using System.IO;
-	using System.Text;
-	using System.Threading.Tasks;
+    using System;
+    using System.IO;
+    using System.Text;
+    using System.Threading.Tasks;
 
     /// <summary>
 	/// Defines a log implementation which outputs to a <see cref="Stream"/>.
 	/// </summary>
-	public class StreamLog : IMessageLog
-	{
-		private readonly StreamWriter _output;
+	public class StreamLog : IMessageLog, IAsyncDisposable
+    {
+        private readonly StreamWriter _output;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="StreamLog"/> class.
-		/// </summary>
-		/// <param name="output"></param>
-		/// <param name="encoding"></param>
-		public StreamLog(Stream output, Encoding? encoding = null)
-		{
-			_output = new StreamWriter(output, encoding ?? Encoding.UTF8);
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StreamLog"/> class.
+        /// </summary>
+        /// <param name="output"></param>
+        /// <param name="encoding"></param>
+        public StreamLog(Stream output, Encoding? encoding = null)
+        {
+            _output = new StreamWriter(output, encoding ?? Encoding.UTF8);
+        }
 
-		/// <inheritdoc />
-		public Task Write(string msg)
-		{
-			return _output.WriteAsync(msg);
-		}
-	}
+        /// <inheritdoc />
+        public Task Write(string msg)
+        {
+            return _output.WriteAsync(msg);
+        }
+
+        /// <inheritdoc />
+        public async ValueTask DisposeAsync()
+        {
+            await _output.DisposeAsync().ConfigureAwait(false);
+            GC.SuppressFinalize(this);
+        }
+    }
 }

@@ -87,6 +87,7 @@ namespace Reimers.Ihe.Communication.Http
         public void Dispose()
         {
             _httpClientHandler.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

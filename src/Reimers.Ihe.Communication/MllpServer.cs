@@ -45,12 +45,10 @@ namespace Reimers.Ihe.Communication
         private readonly RemoteCertificateValidationCallback? _userCertificateValidationCallback;
         private readonly int _bufferSize;
         private readonly TcpListener _listener;
-        private readonly List<MllpHost> _connections = new List<MllpHost>();
+        private readonly List<MllpHost> _connections = new();
         private readonly Timer _timer;
-        private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
-#pragma warning disable IDE0052 // Remove unread private members
+        private readonly CancellationTokenSource _tokenSource = new();
         private Task? _readTask;
-#pragma warning restore IDE0052 // Remove unread private members
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MllpServer"/> class.
@@ -132,6 +130,7 @@ namespace Reimers.Ihe.Communication
                 }
                 catch (OperationCanceledException) { }
             }
+            GC.SuppressFinalize(this);
         }
 
         private async Task Read()

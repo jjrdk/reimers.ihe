@@ -52,6 +52,7 @@ namespace Reimers.Ihe.Communication.Http
         public ValueTask DisposeAsync()
         {
             _httpClient.Dispose();
+            GC.SuppressFinalize(this);
             return new ValueTask();
         }
 
