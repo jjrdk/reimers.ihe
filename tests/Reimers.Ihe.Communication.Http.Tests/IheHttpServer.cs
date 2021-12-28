@@ -30,6 +30,7 @@ namespace Reimers.Ihe.Communication.Http.Tests
     using System.Text;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.TestHost;
     using NHapi.Base.Parser;
 
@@ -43,7 +44,7 @@ namespace Reimers.Ihe.Communication.Http.Tests
                 .UseUrls(urls.ToArray())
                 .Configure(a =>
                 {
-                    a.Use(async (ctx, next) =>
+                    a.Use(async (HttpContext ctx, RequestDelegate next) =>
                        {
                            var charset =
                                   ctx.Request.ContentType?.Contains(';') == true

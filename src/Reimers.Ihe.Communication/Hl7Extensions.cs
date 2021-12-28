@@ -1,7 +1,6 @@
 namespace Reimers.Ihe.Communication
 {
     using NHapi.Base.Model;
-    using NHapi.Base.Parser;
 
     /// <summary>
     /// Defines the HL7 extension methods.

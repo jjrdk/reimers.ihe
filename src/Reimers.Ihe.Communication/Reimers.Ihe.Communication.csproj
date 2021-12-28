@@ -5,13 +5,13 @@
 		<Title>Reimers.Ihe.Communication</Title>
 		<Description>Classes to handle MLLP connections and IHE transactions.</Description>
 		<PackageTags>HL7 IHE MLLP</PackageTags>
-		<PackageReleaseNotes>Update to net standard 2.0.</PackageReleaseNotes>
+		<PackageReleaseNotes>Update to net 6.0.</PackageReleaseNotes>
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Reimers.Ihe.Communication.xml</DocumentationFile>
 		<AssemblyName>reimers.ihe.communication</AssemblyName>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 	</ItemGroup>
 
 	<Import Project="../../shared.proj" />

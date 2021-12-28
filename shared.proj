@@ -1,12 +1,12 @@
 <Project>
     <PropertyGroup>
-        <CurrentVersion>3.0.0</CurrentVersion>
+        <CurrentVersion>3.2.0</CurrentVersion>
         <Version>$(CurrentVersion)</Version>
         <Authors>Jacob Reimers</Authors>
         <Owners>Jacob Reimers</Owners>
-        <TargetFrameworks>netstandard2.1;net5.0</TargetFrameworks>
+        <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
         <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
-        <Copyright>Reimers.dk (c) 2016 - 2020</Copyright>
+        <Copyright>Reimers.dk (c) 2016 - 2022</Copyright>
         <Company>Reimers.dk</Company>
         <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
         <Product>Reimers IHE</Product>

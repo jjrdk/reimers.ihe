@@ -10,7 +10,7 @@
         <Description>Classes to handle MLLP connections and transactions.</Description>
         <Copyright>Reimers.dk © 2016 - 2017</Copyright>
         <Company>Reimers.dk</Company>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <PackageTags>HL7 IHE</PackageTags>
         <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
     </PropertyGroup>
@@ -21,8 +21,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
-        <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="5.0.9" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.1" />
         <PackageReference Include="NHapi.Model.V251" Version="3.0.2" />
         <PackageReference Include="xunit" Version="2.4.1" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
