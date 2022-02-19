@@ -218,7 +218,7 @@ namespace Reimers.Ihe.Communication
                 .ConfigureAwait(false);
 
             cancellationToken.ThrowIfCancellationRequested();
-            string resultMsg = _parser.Encode(result);
+            var resultMsg = _parser.Encode(result);
             await WriteToStream(resultMsg, cancellationToken)
                 .ConfigureAwait(false);
             await _messageLog.Write(resultMsg).ConfigureAwait(false);
@@ -243,7 +243,7 @@ namespace Reimers.Ihe.Communication
                     count),
                     cancellationToken)
                 .ConfigureAwait(false);
-
+            await _stream.FlushAsync(cancellationToken).ConfigureAwait(false);
             ArrayPool<byte>.Shared.Return(buffer);
             _asyncLock.Release(1);
         }

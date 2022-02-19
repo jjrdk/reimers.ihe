@@ -57,6 +57,7 @@ namespace Reimers.Ihe.Communication
             _userCertificateValidationCallback;
 
         private readonly int _bufferSize;
+        private readonly bool _strict;
         private string _remoteAddress = null!;
         private Stream _stream = null!;
         private readonly CancellationTokenSource _tokenSource = new();
@@ -72,7 +73,8 @@ namespace Reimers.Ihe.Communication
             X509CertificateCollection? clientCertificates,
             RemoteCertificateValidationCallback?
                 userCertificateValidationCallback,
-            int bufferSize)
+            int bufferSize,
+            bool strict)
         {
             _address = address;
             _port = port;
@@ -83,6 +85,7 @@ namespace Reimers.Ihe.Communication
             _userCertificateValidationCallback =
                 userCertificateValidationCallback;
             _bufferSize = bufferSize;
+            _strict = strict;
         }
 
         /// <summary>
@@ -96,6 +99,7 @@ namespace Reimers.Ihe.Communication
         /// <param name="clientCertificates"></param>
         /// <param name="userCertificateValidationCallback"></param>
         /// <param name="bufferSize"></param>
+        /// <param name="strict"></param>
         /// <returns></returns>
         public static async Task<IHostConnection> Create(
             string address,
@@ -106,7 +110,8 @@ namespace Reimers.Ihe.Communication
             X509CertificateCollection? clientCertificates = null,
             RemoteCertificateValidationCallback?
                 userCertificateValidationCallback = null,
-            int bufferSize = 4096)
+            int bufferSize = 4096,
+            bool strict = true)
         {
             var instance = new MllpClient(
                 address,
@@ -116,7 +121,8 @@ namespace Reimers.Ihe.Communication
                 encoding ?? Encoding.ASCII,
                 clientCertificates,
                 userCertificateValidationCallback,
-                bufferSize);
+                bufferSize,
+                strict);
             await instance.Setup().ConfigureAwait(false);
             return instance;
         }
@@ -209,7 +215,12 @@ namespace Reimers.Ihe.Communication
             {
             }
 
-            _stream.Close();
+            try
+            {
+                _stream.Close();
+            }
+            finally { }
+
             await _stream.DisposeAsync().ConfigureAwait(false);
             _tcpClient.Close();
             _tcpClient.Dispose();
@@ -240,6 +251,11 @@ namespace Reimers.Ihe.Communication
                     }
 
                     ArrayPool<byte>.Shared.Return(buffer);
+                    if (index == -2 && _strict)
+                    {
+                        _stream.Close();
+                        return;
+                    }
                 }
             }
             catch (IOException io)
@@ -299,7 +315,10 @@ namespace Reimers.Ihe.Communication
 
             if (buffer[endblockEnd] == Constants.EndBlock[1])
             {
+                var count = messageBuilder.Count;
                 messageBuilder.AddRange(bytes);
+                count = messageBuilder.Count - count;
+                index += count;
                 var s = _encoding.GetString(messageBuilder.ToArray());
                 messageBuilder.Clear();
                 var msg = _parser.Parse(s);
@@ -308,11 +327,12 @@ namespace Reimers.Ihe.Communication
                 var completionSource = _messages[controlId];
                 _messages.Remove(controlId);
                 completionSource.SetResult(message);
+                return buffer.Skip(endblockEnd).TakeWhile(b => b > 0).Any()
+                    ? endblockEnd + 1
+                    : -2;
             }
-            else
-            {
-                messageBuilder.AddRange(bytes);
-            }
+
+            messageBuilder.AddRange(bytes);
 
             return endblockStart == -1
                 ? -1

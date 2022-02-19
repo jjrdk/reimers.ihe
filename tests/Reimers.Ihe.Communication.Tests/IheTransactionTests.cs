@@ -44,8 +44,11 @@ namespace Reimers.Ihe.Communication.Tests
         [Fact]
         public async Task WhenSendingUpdateMessageThenIncludesObserver()
         {
-            IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
-            var client = await MllpClient.Create(IPAddress.Loopback.ToString(), Port).ConfigureAwait(false);
+            IMessageControlIdGenerator generator =
+                DefaultMessageControlIdGenerator.Instance;
+            await using var client = await MllpClient
+                .Create(IPAddress.Loopback.ToString(), Port)
+                .ConfigureAwait(false);
             var request = new SSU_U03();
             request.MSH.MessageControlID.Value = generator.NextId();
             var container = request.AddSPECIMEN_CONTAINER();
@@ -60,7 +63,7 @@ namespace Reimers.Ihe.Communication.Tests
         public async Task WhenSendingMessageThenGetsAck()
         {
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
-            var client = await MllpClient.Create(IPAddress.Loopback.ToString(), Port, bufferSize: 30).ConfigureAwait(false);
+            await using var client = await MllpClient.Create(IPAddress.Loopback.ToString(), Port, bufferSize: 30).ConfigureAwait(false);
             var request = new QBP_Q11();
             request.MSH.MessageControlID.Value = generator.NextId();
             var response = await client.Send(request).ConfigureAwait(false);
@@ -92,20 +95,22 @@ namespace Reimers.Ihe.Communication.Tests
         }
 
         [Fact]
-        public async Task WhenSendingMultipleSequentialMessageThenGetsAckForAll()
+        public async Task WhenSendingMultipleSequentialMessageInNonStrictModeThenGetsAckForAll()
         {
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
             await using var client = await MllpClient.Create(
                 IPAddress.Loopback.ToString(),
-                Port).ConfigureAwait(false);
+                Port,
+                strict: false).ConfigureAwait(false);
 
-            var tasks = Enumerable.Repeat(false, 100)
+            var tasks = Enumerable.Repeat(false, 300)
                     .Select(
                         async _ =>
                         {
                             var request = new QBP_Q11();
                             request.MSH.MessageControlID.Value = generator.NextId();
                             var response =
+                                // ReSharper disable once AccessToDisposedClosure
                                 await client.Send(request).ConfigureAwait(false);
                             return response.Message is ACK;
                         });
