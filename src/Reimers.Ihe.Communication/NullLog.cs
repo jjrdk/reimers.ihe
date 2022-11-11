@@ -21,8 +21,9 @@
 namespace Reimers.Ihe.Communication
 {
 	using System.Threading.Tasks;
+    using Abstractions;
 
-	/// <summary>
+    /// <summary>
 	/// Defines a no-op logger.
 	/// </summary>
 	public class NullLog : IMessageLog

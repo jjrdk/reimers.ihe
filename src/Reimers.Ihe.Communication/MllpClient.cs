@@ -33,6 +33,7 @@ namespace Reimers.Ihe.Communication
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using Abstractions;
     using NHapi.Base.Model;
     using NHapi.Base.Parser;
 
@@ -193,7 +194,7 @@ namespace Reimers.Ihe.Communication
                 await ssl.AuthenticateAsClientAsync(
                         _address,
                         _clientCertificates,
-                        SslProtocols.Tls11 | SslProtocols.Tls12,
+                        SslProtocols.Tls12,
                         false)
                     .ConfigureAwait(false);
                 _stream = ssl;

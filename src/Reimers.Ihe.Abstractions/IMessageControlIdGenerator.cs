@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IIheTransactionHandler.cs" company="Reimers.dk">
+// <copyright file="IMessageControlIdGenerator.cs" company="Reimers.dk">
 //   Copyright © Reimers.dk 2017
 //   This source is subject to the MIT License.
 //   Please see https://opensource.org/licenses/MIT for details.
@@ -18,33 +18,17 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Reimers.Ihe.Communication
+namespace Reimers.Ihe.Abstractions
 {
-    using System.Threading;
-    using System.Threading.Tasks;
-    using NHapi.Base.Model;
-
-    /// <summary>
-    /// Defines the interface for handling IHE transactions.
-    /// </summary>
-    public interface IIheTransactionHandler
-    {
-        /// <summary>
-        /// Gets the name of the message structure that is handled.
-        /// </summary>
-        string Handles { get; }
-
-        /// <summary>
-        /// Gets the version of the message that is handled.
-        /// </summary>
-        string Version { get; }
-
-        /// <summary>
-        /// Handles the received message.
-        /// </summary>
-        /// <param name="message">The message to handle.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken"/> for the async operation.</param>
-        /// <returns>The response message.</returns>
-        Task<IMessage> Handle(IMessage message, CancellationToken cancellationToken = default);
-    }
+	/// <summary>
+	/// Defines the public interface for an application wide message control id generation.
+	/// </summary>
+	public interface IMessageControlIdGenerator
+	{
+		/// <summary>
+		/// Generates the next message id.
+		/// </summary>
+		/// <returns>The message id as a <see cref="string"/>.</returns>
+		string NextId();
+	}
 }

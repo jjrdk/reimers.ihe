@@ -24,6 +24,7 @@ namespace Reimers.Ihe.Communication.Tests
     using System.Linq;
     using System.Net;
     using System.Threading.Tasks;
+    using Abstractions;
     using NHapi.Model.V251.Message;
     using Xunit;
 

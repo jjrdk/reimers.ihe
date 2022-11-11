@@ -1,4 +1,4 @@
-namespace Reimers.Ihe.Communication
+namespace Reimers.Ihe.Abstractions
 {
     using NHapi.Base.Model;
 

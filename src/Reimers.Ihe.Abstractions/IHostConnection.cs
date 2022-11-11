@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IHl7MessageMiddleware.cs" company="Reimers.dk">
+// <copyright file="IHostConnection.cs" company="Reimers.dk">
 //   Copyright © Reimers.dk 2017
 //   This source is subject to the MIT License.
 //   Please see https://opensource.org/licenses/MIT for details.
@@ -18,23 +18,24 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Reimers.Ihe.Communication
+namespace Reimers.Ihe.Abstractions
 {
-    using System.Threading;
-    using System.Threading.Tasks;
     using NHapi.Base.Model;
 
     /// <summary>
-    /// Defines the HL7 handling interface.
+    /// Defines the interface for a connection to an IHE host.
     /// </summary>
-    public interface IHl7MessageMiddleware
+    public interface IHostConnection : IAsyncDisposable
     {
         /// <summary>
-        /// Handles the passed <see cref="Hl7Message"/> message.
+        /// Sends the passed message to the server and awaits the response.
         /// </summary>
-        /// <param name="message">The <see cref="Hl7Message"/> to handle.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken"/> for the async operation.</param>
-        /// <returns>An HL7 response as a <see cref="string"/>.</returns>
-        Task<IMessage> Handle(Hl7Message message, CancellationToken cancellationToken = default);
+        /// <param name="message">The message to send.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> for the operation.</param>
+        /// <returns>An <see cref="Reimers.Ihe.Abstractions.Hl7Message"/> containing the response and source address.</returns>
+        Task<Hl7Message> Send<TMessage>(
+            TMessage message,
+            CancellationToken cancellationToken = default)
+            where TMessage : IMessage;
     }
 }

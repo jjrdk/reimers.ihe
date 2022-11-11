@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="StreamLog.cs" company="Reimers.dk">
+// <copyright file="IHl7MessageMiddleware.cs" company="Reimers.dk">
 //   Copyright © Reimers.dk 2017
 //   This source is subject to the MIT License.
 //   Please see https://opensource.org/licenses/MIT for details.
@@ -18,42 +18,21 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Reimers.Ihe.Communication
+namespace Reimers.Ihe.Abstractions
 {
-    using System;
-    using System.IO;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Abstractions;
+    using NHapi.Base.Model;
 
     /// <summary>
-	/// Defines a log implementation which outputs to a <see cref="Stream"/>.
-	/// </summary>
-	public class StreamLog : IMessageLog, IAsyncDisposable
+    /// Defines the HL7 handling interface.
+    /// </summary>
+    public interface IHl7MessageMiddleware
     {
-        private readonly StreamWriter _output;
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="StreamLog"/> class.
+        /// Handles the passed <see cref="Hl7Message"/> message.
         /// </summary>
-        /// <param name="output"></param>
-        /// <param name="encoding"></param>
-        public StreamLog(Stream output, Encoding? encoding = null)
-        {
-            _output = new StreamWriter(output, encoding ?? Encoding.UTF8);
-        }
-
-        /// <inheritdoc />
-        public Task Write(string msg)
-        {
-            return _output.WriteAsync(msg);
-        }
-
-        /// <inheritdoc />
-        public async ValueTask DisposeAsync()
-        {
-            await _output.DisposeAsync().ConfigureAwait(false);
-            GC.SuppressFinalize(this);
-        }
+        /// <param name="message">The <see cref="Hl7Message"/> to handle.</param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> for the async operation.</param>
+        /// <returns>An HL7 response as a <see cref="string"/>.</returns>
+        Task<IMessage> Handle(Hl7Message message, CancellationToken cancellationToken = default);
     }
 }

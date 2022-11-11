@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<PackageId>Reimers.Ihe.Abstractions</PackageId>
+		<Title>Reimers.Ihe.Abstractions</Title>
+		<Description>Classes to handle MLLP connections and IHE transactions.</Description>
+		<PackageTags>HL7 IHE MLLP</PackageTags>
+		<PackageReleaseNotes>Update to net 6.0.</PackageReleaseNotes>
+		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Reimers.Ihe.Communication.xml</DocumentationFile>
+		<AssemblyName>reimers.ihe.abstractions</AssemblyName>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+
+	<Import Project="../../shared.proj" />
+
+	<ItemGroup>
+		<PackageReference Include="NHapi.Base" Version="3.1.1" />
+	</ItemGroup>
+</Project>

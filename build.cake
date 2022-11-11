@@ -136,6 +136,7 @@ Task("Pack")
             MSBuildSettings = new DotNetCoreMSBuildSettings().SetConfiguration(configuration).SetVersion(buildVersion)
         };
 
+        DotNetCorePack("./src/Reimers.Ihe.Abstractions/Reimers.Ihe.Abstractions.csproj", packSettings);
         DotNetCorePack("./src/Reimers.Ihe.Communication/Reimers.Ihe.Communication.csproj", packSettings);
         DotNetCorePack("./src/Reimers.Ihe.Communication.Http/Reimers.Ihe.Communication.Http.csproj", packSettings);
     });

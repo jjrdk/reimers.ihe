@@ -1,6 +1,7 @@
 namespace Reimers.Ihe.Communication.Tests
 {
     using System.Threading.Tasks;
+    using Abstractions;
     using NHapi.Base.Parser;
     using NHapi.Model.V251.Message;
     using Xunit;

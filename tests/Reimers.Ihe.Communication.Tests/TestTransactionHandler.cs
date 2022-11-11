@@ -1,6 +1,7 @@
 namespace Reimers.Ihe.Communication.Tests
 {
     using System.Threading.Tasks;
+    using Abstractions;
     using NHapi.Model.V251.Message;
 
     public class TestTransactionHandler : IheTransactionHandler<ADT_A01, ACK>

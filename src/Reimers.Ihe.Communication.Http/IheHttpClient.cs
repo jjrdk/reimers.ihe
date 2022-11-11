@@ -27,6 +27,7 @@ namespace Reimers.Ihe.Communication.Http
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using Abstractions;
     using NHapi.Base.Model;
     using NHapi.Base.Parser;
 

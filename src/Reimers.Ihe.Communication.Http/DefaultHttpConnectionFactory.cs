@@ -25,6 +25,7 @@ namespace Reimers.Ihe.Communication.Http
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
     using System.Threading.Tasks;
+    using Abstractions;
     using NHapi.Base.Parser;
 
     /// <summary>

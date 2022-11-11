@@ -1,10 +1,10 @@
 <Project>
     <PropertyGroup>
-        <CurrentVersion>3.3.0</CurrentVersion>
+        <CurrentVersion>3.4.0</CurrentVersion>
         <Version>$(CurrentVersion)</Version>
         <Authors>Jacob Reimers</Authors>
         <Owners>Jacob Reimers</Owners>
-        <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
+        <TargetFrameworks>netstandard2.1;net6.0;net7.0</TargetFrameworks>
         <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
         <Copyright>Reimers.dk (c) 2016 - 2022</Copyright>
         <Company>Reimers.dk</Company>

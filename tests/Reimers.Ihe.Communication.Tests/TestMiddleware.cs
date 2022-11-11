@@ -22,6 +22,7 @@ namespace Reimers.Ihe.Communication.Tests
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using Abstractions;
     using NHapi.Base.Model;
     using NHapi.Model.V251.Message;
 

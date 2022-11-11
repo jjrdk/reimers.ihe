@@ -23,11 +23,11 @@ namespace Reimers.Ihe.Communication.Http.Tests
     using System;
     using System.Buffers;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
     using System.Net;
     using System.Net.Http;
     using System.Text;
+    using Abstractions;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;

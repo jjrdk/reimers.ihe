@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IMessageLog.cs" company="Reimers.dk">
+// <copyright file="DefaultMessageControlIdGenerator.cs" company="Reimers.dk">
 //   Copyright © Reimers.dk 2017
 //   This source is subject to the MIT License.
 //   Please see https://opensource.org/licenses/MIT for details.
@@ -18,20 +18,38 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Reimers.Ihe.Communication
+namespace Reimers.Ihe.Abstractions
 {
-    using System.Threading.Tasks;
-
     /// <summary>
-	/// Defines the public interface for an HL7 message log.
-	/// </summary>
-	public interface IMessageLog
+    /// Defines the default message control id generator.
+    /// </summary>
+    /// <remarks>The generated id is thread safe and unique within a single application.</remarks>
+    public class DefaultMessageControlIdGenerator : IMessageControlIdGenerator
     {
+        private int _seed;
+        private static readonly object SyncRoot = new object();
+
+        private DefaultMessageControlIdGenerator()
+        {
+        }
+
         /// <summary>
-        /// Writes the passed message to the log.
+        /// Gets the singleton instance of the id generator.
         /// </summary>
-        /// <param name="msg"></param>
-        /// <returns></returns>
-        Task Write(string msg);
+        public static DefaultMessageControlIdGenerator Instance { get; } = new DefaultMessageControlIdGenerator();
+
+        /// <inheritdoc />
+        public string NextId()
+        {
+            lock (SyncRoot)
+            {
+                var counter = Interlocked.Increment(ref _seed);
+                if (counter >= 999999)
+                {
+                    _seed = 0;
+                }
+                return $"{DateTime.UtcNow:yyyyMMddHHmmss}{counter:D6}";
+            }
+        }
     }
 }

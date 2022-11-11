@@ -1,6 +1,6 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Hl7Message.cs" company="Reimers.dk">
-//   Copyright © Reimers.dk 2017
+// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="IIheTransactionHandler.cs" company="Reimers.dk">
+//   Copyright � Reimers.dk 2017
 //   This source is subject to the MIT License.
 //   Please see https://opensource.org/licenses/MIT for details.
 //   All other rights reserved.
@@ -18,40 +18,31 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Reimers.Ihe.Communication
+namespace Reimers.Ihe.Abstractions
 {
     using NHapi.Base.Model;
 
     /// <summary>
-    /// Defines the container for received HL7 content.
+    /// Defines the interface for handling IHE transactions.
     /// </summary>
-    public class Hl7Message
+    public interface IIheTransactionHandler
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Hl7Message"/> class.
+        /// Gets the name of the message structure that is handled.
         /// </summary>
-        /// <param name="message">The raw HL7 message.</param>
-        /// <param name="sourceAddress">The address the message was received from.</param>
-        public Hl7Message(IMessage message, string sourceAddress)
-        {
-            Message = message;
-            SourceAddress = sourceAddress;
-        }
+        string Handles { get; }
 
         /// <summary>
-        /// Gets the address the message was received from.
+        /// Gets the version of the message that is handled.
         /// </summary>
-        public string SourceAddress { get; }
+        string Version { get; }
 
         /// <summary>
-        /// Gets the raw received HL7 message.
+        /// Handles the received message.
         /// </summary>
-        public IMessage Message { get; }
-
-        /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            return (SourceAddress + Message).GetHashCode();
-        }
+        /// <param name="message">The message to handle.</param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> for the async operation.</param>
+        /// <returns>The response message.</returns>
+        Task<IMessage> Handle(IMessage message, CancellationToken cancellationToken = default);
     }
 }

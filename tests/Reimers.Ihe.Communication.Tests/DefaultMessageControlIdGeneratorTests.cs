@@ -2,6 +2,7 @@ namespace Reimers.Ihe.Communication.Tests
 {
     using System.Linq;
     using System.Threading.Tasks;
+    using Abstractions;
     using Xunit;
 
     public static class DefaultMessageControlIdGeneratorTests

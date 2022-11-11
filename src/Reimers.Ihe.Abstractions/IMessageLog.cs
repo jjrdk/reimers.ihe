@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IMessageControlIdGenerator.cs" company="Reimers.dk">
+// <copyright file="IMessageLog.cs" company="Reimers.dk">
 //   Copyright © Reimers.dk 2017
 //   This source is subject to the MIT License.
 //   Please see https://opensource.org/licenses/MIT for details.
@@ -18,17 +18,18 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Reimers.Ihe.Communication
+namespace Reimers.Ihe.Abstractions
 {
-	/// <summary>
-	/// Defines the public interface for an application wide message control id generation.
+    /// <summary>
+	/// Defines the public interface for an HL7 message log.
 	/// </summary>
-	public interface IMessageControlIdGenerator
-	{
-		/// <summary>
-		/// Generates the next message id.
-		/// </summary>
-		/// <returns>The message id as a <see cref="string"/>.</returns>
-		string NextId();
-	}
+	public interface IMessageLog
+    {
+        /// <summary>
+        /// Writes the passed message to the log.
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <returns></returns>
+        Task Write(string msg);
+    }
 }

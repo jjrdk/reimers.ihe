@@ -18,10 +18,8 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Reimers.Ihe.Communication
+namespace Reimers.Ihe.Abstractions
 {
-    using System.Threading;
-    using System.Threading.Tasks;
     using NHapi.Base.Model;
 
     /// <summary>
@@ -66,7 +64,7 @@ namespace Reimers.Ihe.Communication
         /// Verifies the contents of the incoming messages.
         /// </summary>
         /// <param name="message">The incoming message to verify.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken"/> for the async operation.</param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> for the async operation.</param>
         /// <returns>
         /// <para>If the incoming message cannot be verified, the method returns <c>false</c> as status and an error response message.</para>
         /// <para>If the verification is successful, the method returns <c>true</c> and them response message is null.</para>

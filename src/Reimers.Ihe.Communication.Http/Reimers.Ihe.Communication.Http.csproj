@@ -14,8 +14,9 @@
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 	</ItemGroup>
 
-	<Import Project="../../shared.proj" />
 	<ItemGroup>
-		<ProjectReference Include="..\Reimers.Ihe.Communication\Reimers.Ihe.Communication.csproj" />
+	  <ProjectReference Include="..\Reimers.Ihe.Abstractions\Reimers.Ihe.Abstractions.csproj" />
 	</ItemGroup>
+
+	<Import Project="../../shared.proj" />
 </Project>

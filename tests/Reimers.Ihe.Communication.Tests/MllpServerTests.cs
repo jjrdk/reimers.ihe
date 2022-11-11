@@ -3,6 +3,7 @@
     using System;
     using System.Net;
     using System.Threading.Tasks;
+    using Abstractions;
     using NHapi.Model.V251.Message;
     using Xunit;
 
