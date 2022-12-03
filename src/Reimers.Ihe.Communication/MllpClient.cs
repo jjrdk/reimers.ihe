@@ -26,6 +26,7 @@ namespace Reimers.Ihe.Communication
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using System.Net.Security;
     using System.Net.Sockets;
     using System.Security.Authentication;
@@ -99,6 +100,7 @@ namespace Reimers.Ihe.Communication
         /// <param name="encoding"></param>
         /// <param name="clientCertificates"></param>
         /// <param name="userCertificateValidationCallback"></param>
+        /// <param name="targetHost">The server address for the secure connection. If <c>null</c> to string representation of the <paramref name="address"/> will be used.</param>
         /// <param name="bufferSize"></param>
         /// <param name="strict"></param>
         /// <returns></returns>
@@ -111,7 +113,7 @@ namespace Reimers.Ihe.Communication
             X509CertificateCollection? clientCertificates = null,
             RemoteCertificateValidationCallback?
                 userCertificateValidationCallback = null,
-            int bufferSize = 4096,
+            int bufferSize = 256,
             bool strict = true)
         {
             var instance = new MllpClient(
@@ -174,6 +176,7 @@ namespace Reimers.Ihe.Communication
                 .WriteAsync(buffer.AsMemory(0, length), cancellationToken)
                 .ConfigureAwait(false);
             ArrayPool<byte>.Shared.Return(buffer);
+            await _stream.FlushAsync(cancellationToken).ConfigureAwait(false);
             _semaphore.Release(1);
             return await completionSource.Task.ConfigureAwait(false);
         }

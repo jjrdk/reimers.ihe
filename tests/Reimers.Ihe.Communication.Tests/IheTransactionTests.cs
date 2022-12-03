@@ -47,9 +47,10 @@ namespace Reimers.Ihe.Communication.Tests
         {
             IMessageControlIdGenerator generator =
                 DefaultMessageControlIdGenerator.Instance;
-            await using var client = await MllpClient
+            var client = await MllpClient
                 .Create(IPAddress.Loopback.ToString(), Port)
                 .ConfigureAwait(false);
+            await using var _ = client.ConfigureAwait(false);
             var request = new SSU_U03();
             request.MSH.MessageControlID.Value = generator.NextId();
             var container = request.AddSPECIMEN_CONTAINER();
@@ -64,7 +65,8 @@ namespace Reimers.Ihe.Communication.Tests
         public async Task WhenSendingMessageThenGetsAck()
         {
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
-            await using var client = await MllpClient.Create(IPAddress.Loopback.ToString(), Port, bufferSize: 30).ConfigureAwait(false);
+            var client = await MllpClient.Create(IPAddress.Loopback.ToString(), Port, bufferSize: 30).ConfigureAwait(false);
+            await using var _ = client.ConfigureAwait(false);
             var request = new QBP_Q11();
             request.MSH.MessageControlID.Value = generator.NextId();
             var response = await client.Send(request).ConfigureAwait(false);
@@ -80,9 +82,10 @@ namespace Reimers.Ihe.Communication.Tests
                     .Select(
                         async _ =>
                         {
-                            await using var client = await MllpClient.Create(
+                            var client = await MllpClient.Create(
                                 IPAddress.Loopback.ToString(),
                                 Port).ConfigureAwait(false);
+                            await using var __ = client.ConfigureAwait(false);
                             var request = new QBP_Q11();
                             request.MSH.MessageControlID.Value = generator.NextId();
                             var response =
@@ -99,12 +102,13 @@ namespace Reimers.Ihe.Communication.Tests
         public async Task WhenSendingMultipleSequentialMessageInNonStrictModeThenGetsAckForAll()
         {
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
-            await using var client = await MllpClient.Create(
+            var client = await MllpClient.Create(
                 IPAddress.Loopback.ToString(),
                 Port,
                 strict: false).ConfigureAwait(false);
+            await using var __ = client.ConfigureAwait(false);
 
-            var tasks = Enumerable.Repeat(false, 300)
+            var tasks = Enumerable.Repeat(false, 3000)
                     .Select(
                         async _ =>
                         {

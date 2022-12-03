@@ -76,7 +76,7 @@ namespace Reimers.Ihe.Communication
             X509Certificate? serverCertificate = null,
             RemoteCertificateValidationCallback?
                 userCertificateValidationCallback = null,
-            int bufferSize = 4096)
+            int bufferSize = 256)
         {
             var host = new MllpHost(
                 tcpClient,
@@ -135,14 +135,16 @@ namespace Reimers.Ihe.Communication
                     var buffer = ArrayPool<byte>.Shared.Rent(_bufferSize);
                     var read = await _stream.ReadAsync(buffer.AsMemory(0, _bufferSize), cancellationToken)
                         .ConfigureAwait(false);
-                    while (index > -1)
+                    while (true)
                     {
-                        index = Process(
-                            buffer,
-                            index,
+                        var length = read - index;
+                        var nextIndex = Process(
+                            buffer.AsSpan(index, length),
                             messageBuilder,
-                            read - index,
                             cancellationToken);
+                        if (nextIndex == -1) { break; }
+
+                        index += nextIndex;
                     }
                     ArrayPool<byte>.Shared.Return(buffer);
                 }
@@ -160,56 +162,64 @@ namespace Reimers.Ihe.Communication
             }
         }
 
-        private int Process(byte[] buffer, int index, List<byte> messageBuilder, int read, CancellationToken cancellationToken)
+        private int Process(Span<byte> buffer, List<byte> messageBuilder, CancellationToken cancellationToken)
         {
-            if (read < 0)
+            if (buffer.Length == 0)
             {
                 return -1;
             }
-            var isStart = buffer[index] == 11;
+            var isStart = buffer[0] == 11;
             if (isStart)
             {
                 if (messageBuilder.Count > 0)
                 {
                     throw new Exception(
                         "Unexpected character: "
-                        + buffer[index].ToString("x2"));
+                        + buffer[0].ToString("x2"));
                 }
             }
 
-            var endblockStart = Array.IndexOf(
-                buffer,
-                Constants.EndBlock[0],
-                index,
-                read);
+            var endblockStart = buffer.IndexOf(Constants.EndBlock[0]);
             var endblockEnd = endblockStart + 1;
-            var bytes = buffer.Skip(index).Take(endblockStart > -1 ? endblockStart - index : read);
+            var bytes = buffer[..(endblockStart > -1 ? endblockStart : buffer.Length)];
             if (isStart)
             {
-                bytes = bytes.Skip(1);
+                bytes = bytes.Length == 0 ? bytes : bytes[1..];
             }
 
             if (buffer[endblockEnd] == Constants.EndBlock[1])
             {
-                messageBuilder.AddRange(bytes);
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    messageBuilder.Add(bytes[i]);
+                }
                 _ = SendResponse(messageBuilder.ToArray(), cancellationToken)
                     .ConfigureAwait(false);
                 messageBuilder.Clear();
             }
             else
             {
-                messageBuilder.AddRange(bytes);
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    messageBuilder.Add(bytes[i]);
+                }
             }
 
-            return endblockStart == -1 ? -1 : Array.IndexOf(buffer, Constants.StartBlock[0], endblockEnd);
+            if (endblockStart == -1)
+            {
+                return -1;
+            }
+
+            var newStartBlock = buffer[endblockEnd..].IndexOf(Constants.StartBlock[0]);
+            return newStartBlock == -1 ? -1 : newStartBlock + endblockEnd;
         }
 
         private async Task SendResponse(
-            byte[] messageBuilder,
+            Memory<byte> messageBuilder,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var s = _encoding.GetString(messageBuilder);
+            var s = _encoding.GetString(messageBuilder.Span);
             var received = _parser.Parse(s);
             var message = new Hl7Message(
                 received,
@@ -218,7 +228,6 @@ namespace Reimers.Ihe.Communication
             var result = await _middleware.Handle(message, cancellationToken)
                 .ConfigureAwait(false);
 
-            cancellationToken.ThrowIfCancellationRequested();
             var resultMsg = _parser.Encode(result);
             await WriteToStream(resultMsg, cancellationToken)
                 .ConfigureAwait(false);
@@ -231,11 +240,11 @@ namespace Reimers.Ihe.Communication
         {
             await _asyncLock.WaitAsync(cancellationToken).ConfigureAwait(false);
             await _messageLog.Write(response).ConfigureAwait(false);
-            var bytes = _encoding.GetBytes(response);
+            var bytes = _encoding.GetBytes(response).AsMemory();
             var count = bytes.Length + 3;
             var buffer = ArrayPool<byte>.Shared.Rent(count);
             Constants.StartBlock.CopyTo(buffer, 0);
-            bytes.CopyTo(buffer, 1);
+            bytes.CopyTo(buffer.AsMemory(1));
             Constants.EndBlock.CopyTo(buffer, bytes.Length + 1);
 
             await _stream.WriteAsync(

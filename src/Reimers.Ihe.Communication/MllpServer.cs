@@ -73,7 +73,7 @@ namespace Reimers.Ihe.Communication
             X509Certificate? serverCertificate = null,
             RemoteCertificateValidationCallback?
                 userCertificateValidationCallback = null,
-            int bufferSize = 4096)
+            int bufferSize = 256)
         {
             _messageLog = messageLog;
             _middleware = middleware;
@@ -123,14 +123,20 @@ namespace Reimers.Ihe.Communication
             {
                 hosts = _connections.ToArray();
             }
-            foreach (var connection in hosts)
+
+            async Task DisposeConnection(MllpHost connection)
             {
                 try
                 {
                     await connection.DisposeAsync().ConfigureAwait(false);
                 }
-                catch (OperationCanceledException) { }
+                catch (OperationCanceledException)
+                {
+                }
             }
+
+            await Task.WhenAll(hosts.Select(DisposeConnection)).ConfigureAwait(false);
+
             GC.SuppressFinalize(this);
         }
 

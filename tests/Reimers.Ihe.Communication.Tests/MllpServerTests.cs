@@ -25,11 +25,12 @@
         [Fact]
         public async Task WhenClientSendsMessageToServerThenReceivesResponse()
         {
-            var address = IPAddress.IPv6Loopback.ToString();
-            await using var client = await MllpClient.Create(
-                     address,
+            var address = IPAddress.IPv6Loopback;
+            var client = await MllpClient.Create(
+                     address.ToString(),
                      2575)
                  .ConfigureAwait(false);
+            await using var _ = client.ConfigureAwait(false);
             var adt = new ADT_A01();
             adt.MSH.MessageControlID.Value =
                 DefaultMessageControlIdGenerator.Instance.NextId();
