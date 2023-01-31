@@ -10,9 +10,9 @@
         <Description>Classes to handle MLLP connections and transactions.</Description>
         <Copyright>Reimers.dk © 2016 - 2017</Copyright>
         <Company>Reimers.dk</Company>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <PackageTags>HL7 IHE</PackageTags>
-        <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
+        <PackageReleaseNotes>Update to net7.0.</PackageReleaseNotes>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -21,11 +21,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
-        <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.4" />
-        <PackageReference Include="NHapi.Model.V251" Version="3.1.0" />
-        <PackageReference Include="xunit" Version="2.4.1" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
+        <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.0.2" />
+        <PackageReference Include="NHapi.Model.V251" Version="3.2.0" />
+        <PackageReference Include="xunit" Version="2.4.2" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
