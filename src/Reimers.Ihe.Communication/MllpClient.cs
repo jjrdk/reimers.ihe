@@ -286,7 +286,7 @@ namespace Reimers.Ihe.Communication
             {
                 return -1;
             }
-            
+
             var isStart = buffer[index] == 11;
             if (isStart)
             {
@@ -318,10 +318,10 @@ namespace Reimers.Ihe.Communication
 
             if (buffer[endblockEnd] == Constants.EndBlock[1])
             {
-                var count = messageBuilder.Count;
+                //var count = messageBuilder.Count;
                 messageBuilder.AddRange(bytes);
-                count = messageBuilder.Count - count;
-                index += count;
+                //count = messageBuilder.Count - count;
+                //index += count;
                 var s = _encoding.GetString(messageBuilder.ToArray());
                 messageBuilder.Clear();
                 var msg = _parser.Parse(s);

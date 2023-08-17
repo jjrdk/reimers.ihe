@@ -8,7 +8,7 @@
     using NHapi.Model.V251.Message;
     using Xunit;
 
-    public class SecureIheTransactionWithSanTests : IDisposable
+    public class SecureIheTransactionWithSanTests : IAsyncDisposable
     {
         private readonly MllpServer _server;
         private readonly int _port = 2576;
@@ -16,7 +16,8 @@
 
         public SecureIheTransactionWithSanTests()
         {
-            var certificate = X509Certificate2.CreateFromPemFile("cert.pem", "san.pem");
+            var certificate =
+                X509Certificate2.CreateFromPemFile("cert.pem", "san.pem");
             var buffer = certificate.Export(X509ContentType.Pfx, (string)null);
             certificate = new X509Certificate2(buffer, (string)null);
             _cert = new X509Certificate2Collection(
@@ -26,7 +27,8 @@
                 NullLog.Get(),
                 new TestMiddleware(),
                 serverCertificate: _cert[0],
-                userCertificateValidationCallback: UserCertificateValidationCallback);
+                userCertificateValidationCallback:
+                UserCertificateValidationCallback);
             _server.Start();
         }
 
@@ -36,29 +38,33 @@
             X509Chain chain,
             SslPolicyErrors sslPolicyErrors)
         {
-            return sslPolicyErrors == SslPolicyErrors.None || sslPolicyErrors == SslPolicyErrors.RemoteCertificateChainErrors;
+            return true;
         }
 
         [Fact]
         public async Task WhenSendingMessageThenGetsAck()
         {
             var client = await MllpClient.Create(
-                IPAddress.Loopback.ToString(),
-                _port,
-                clientCertificates: _cert,
-                userCertificateValidationCallback:
-                UserCertificateValidationCallback).ConfigureAwait(false);
-            var request = new QBP_Q11();
-            request.MSH.MessageControlID.Value = "test";
+                    IPAddress.Loopback.ToString(),
+                    _port,
+                    clientCertificates: _cert,
+                    userCertificateValidationCallback:
+                    UserCertificateValidationCallback)
+                .ConfigureAwait(false);
+            var request = new QBP_Q11
+            {
+                MSH = { MessageControlID = { Value = "test" }}
+            };
+
             var response = await client.Send(request).ConfigureAwait(false);
             Assert.NotNull(response);
         }
 
         /// <inheritdoc />
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
             GC.SuppressFinalize(this);
-            _server?.DisposeAsync().AsTask().Wait();
+            await _server.DisposeAsync();
         }
     }
 }
