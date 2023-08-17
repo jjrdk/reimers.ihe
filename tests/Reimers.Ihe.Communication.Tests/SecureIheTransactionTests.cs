@@ -28,7 +28,7 @@ namespace Reimers.Ihe.Communication.Tests
     using NHapi.Model.V251.Message;
     using Xunit;
 
-    public class SecureIheTransactionTests : IDisposable
+    public class SecureIheTransactionTests : IAsyncDisposable
     {
         private readonly MllpServer _server;
         private readonly int _port = 2576;
@@ -72,10 +72,10 @@ namespace Reimers.Ihe.Communication.Tests
         }
 
         /// <inheritdoc />
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
             GC.SuppressFinalize(this);
-            _server?.DisposeAsync().AsTask().Wait();
+            await _server.DisposeAsync();
         }
     }
 }
