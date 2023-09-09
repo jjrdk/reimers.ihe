@@ -31,7 +31,7 @@ namespace Reimers.Ihe.Communication.Tests
     public class SecureIheTransactionTests : IAsyncDisposable
     {
         private readonly MllpServer _server;
-        private readonly int _port = 2576;
+        private const int Port = 2576;
         private readonly X509Certificate2Collection _cert;
 
         public SecureIheTransactionTests()
@@ -39,7 +39,7 @@ namespace Reimers.Ihe.Communication.Tests
             _cert = new X509Certificate2Collection(
                 new X509Certificate2("cert.pfx", "password"));
             _server = new MllpServer(
-                new IPEndPoint(IPAddress.Loopback, _port),
+                new IPEndPoint(IPAddress.Loopback, Port),
                 NullLog.Get(),
                 new TestMiddleware(),
                 serverCertificate: _cert[0],
@@ -61,7 +61,7 @@ namespace Reimers.Ihe.Communication.Tests
         {
             var client = await MllpClient.Create(
                 IPAddress.Loopback.ToString(),
-                _port,
+                Port,
                 clientCertificates: _cert,
                 userCertificateValidationCallback:
                 UserCertificateValidationCallback).ConfigureAwait(false);

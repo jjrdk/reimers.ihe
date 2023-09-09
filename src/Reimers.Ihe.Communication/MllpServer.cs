@@ -88,6 +88,7 @@ namespace Reimers.Ihe.Communication
                 ? TimeSpan.FromSeconds(5)
                 : cleanupInterval;
             _timer = new Timer(
+                // ReSharper disable once AsyncVoidLambda
                 async _ => await CleanConnections().ConfigureAwait(false),
                 null,
                 cleanupInterval,

@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="MllpHost.cs" company="Reimers.dk">
-//   Copyright © Reimers.dk 2017
+//   Copyright ï¿½ Reimers.dk 2017
 //   This source is subject to the MIT License.
 //   Please see https://opensource.org/licenses/MIT for details.
 //   All other rights reserved.
@@ -25,7 +25,6 @@ namespace Reimers.Ihe.Communication
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
-    using System.Linq;
     using System.Net.Security;
     using System.Net.Sockets;
     using System.Security.Authentication;
@@ -65,7 +64,10 @@ namespace Reimers.Ihe.Communication
             _bufferSize = bufferSize;
         }
 
-        public bool IsConnected => _client.Connected;
+        public bool IsConnected
+        {
+            get { return _client.Connected; }
+        }
 
         public static async Task<MllpHost> Create(
             TcpClient tcpClient,
@@ -162,6 +164,7 @@ namespace Reimers.Ihe.Communication
             }
         }
 
+        // ReSharper disable once CognitiveComplexity
         private int Process(Span<byte> buffer, List<byte> messageBuilder, CancellationToken cancellationToken)
         {
             if (buffer.Length == 0)
@@ -179,19 +182,19 @@ namespace Reimers.Ihe.Communication
                 }
             }
 
-            var endblockStart = buffer.IndexOf(Constants.EndBlock[0]);
-            var endblockEnd = endblockStart + 1;
-            var bytes = buffer[..(endblockStart > -1 ? endblockStart : buffer.Length)];
+            var endBlockStart = buffer.IndexOf(Constants.EndBlock[0]);
+            var endBlockEnd = endBlockStart + 1;
+            var bytes = buffer[..(endBlockStart > -1 ? endBlockStart : buffer.Length)];
             if (isStart)
             {
                 bytes = bytes.Length == 0 ? bytes : bytes[1..];
             }
 
-            if (buffer[endblockEnd] == Constants.EndBlock[1])
+            if (buffer[endBlockEnd] == Constants.EndBlock[1])
             {
-                for (int i = 0; i < bytes.Length; i++)
+                foreach (var t in bytes)
                 {
-                    messageBuilder.Add(bytes[i]);
+                    messageBuilder.Add(t);
                 }
                 _ = SendResponse(messageBuilder.ToArray(), cancellationToken)
                     .ConfigureAwait(false);
@@ -199,19 +202,19 @@ namespace Reimers.Ihe.Communication
             }
             else
             {
-                for (int i = 0; i < bytes.Length; i++)
+                foreach (var t in bytes)
                 {
-                    messageBuilder.Add(bytes[i]);
+                    messageBuilder.Add(t);
                 }
             }
 
-            if (endblockStart == -1)
+            if (endBlockStart == -1)
             {
                 return -1;
             }
 
-            var newStartBlock = buffer[endblockEnd..].IndexOf(Constants.StartBlock[0]);
-            return newStartBlock == -1 ? -1 : newStartBlock + endblockEnd;
+            var newStartBlock = buffer[endBlockEnd..].IndexOf(Constants.StartBlock[0]);
+            return newStartBlock == -1 ? -1 : newStartBlock + endBlockEnd;
         }
 
         private async Task SendResponse(

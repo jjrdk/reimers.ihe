@@ -51,7 +51,7 @@ namespace Reimers.Ihe.Abstractions
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return (SourceAddress + Message).GetHashCode();
+            return HashCode.Combine(SourceAddress, Message);
         }
     }
 }
