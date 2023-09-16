@@ -1,12 +1,13 @@
 <Project>
     <PropertyGroup>
-        <CurrentVersion>3.4.0</CurrentVersion>
+        <CurrentVersion>3.4.1</CurrentVersion>
         <Version>$(CurrentVersion)</Version>
         <Authors>Jacob Reimers</Authors>
         <Owners>Jacob Reimers</Owners>
-        <TargetFrameworks>netstandard2.1;net6.0;net7.0</TargetFrameworks>
+        <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
         <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
-        <Copyright>Reimers.dk (c) 2016 - 2022</Copyright>
+        <PackageReleaseNotes>Improve network reads by using spans for read data. Add support for net8.0-rc1</PackageReleaseNotes>
+        <Copyright>Reimers.dk (c) 2016 - 2023</Copyright>
         <Company>Reimers.dk</Company>
         <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
         <Product>Reimers IHE</Product>
@@ -18,7 +19,7 @@
         <FileVersion>$(CurrentVersion)</FileVersion>
         <LangVersion>latest</LangVersion>
         <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-        <WarningsAsErrors />
+        <WarningsAsErrors/>
         <WarningsNotAsErrors>618,1701</WarningsNotAsErrors>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <IncludeSymbols>true</IncludeSymbols>
