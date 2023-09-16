@@ -18,6 +18,8 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+
 namespace Reimers.Ihe.Communication
 {
 	using System.Threading.Tasks;
@@ -40,7 +42,7 @@ namespace Reimers.Ihe.Communication
 		}
 
 		/// <inheritdoc />
-		public Task Write(string msg)
+		public Task Write(ReadOnlyMemory<char> msg)
 		{
 			return Task.CompletedTask;
 		}

@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="IheTransactionHandler.cs" company="Reimers.dk">
-//   Copyright © Reimers.dk 2017
+//   Copyright ï¿½ Reimers.dk 2017
 //   This source is subject to the MIT License.
 //   Please see https://opensource.org/licenses/MIT for details.
 //   All other rights reserved.
@@ -54,8 +54,9 @@ namespace Reimers.Ihe.Abstractions
         /// Defines a default message header configuration for the transaction.
         /// </summary>
         /// <param name="message">The message whose header should be configured.</param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> for the async operation.</param>
         /// <returns>The message with configured header.</returns>
-        protected virtual Task<TResponse> ConfigureHeaders(TResponse message)
+        protected virtual Task<TResponse> ConfigureHeaders(TResponse message, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(message);
         }
@@ -69,7 +70,7 @@ namespace Reimers.Ihe.Abstractions
         /// <para>If the incoming message cannot be verified, the method returns <c>false</c> as status and an error response message.</para>
         /// <para>If the verification is successful, the method returns <c>true</c> and them response message is null.</para>
         /// </returns>
-        protected virtual Task<(bool verified, TResponse? response)> VerifyIncomingMessage(TMessage message, CancellationToken cancellationToken)
+        protected virtual Task<(bool verified, TResponse? response)> VerifyIncomingMessage(TMessage message, CancellationToken cancellationToken = default)
         {
             return Task.FromResult<(bool, TResponse?)>((true, null));
         }
@@ -78,7 +79,8 @@ namespace Reimers.Ihe.Abstractions
         /// The concrete method for handling specific messages.
         /// </summary>
         /// <param name="message">The concrete message to handle.</param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> for the async operation.</param>
         /// <returns>The response message as an asynchronous operation.</returns>
-        protected abstract Task<TResponse> HandleInternal(TMessage message);
+        protected abstract Task<TResponse> HandleInternal(TMessage message, CancellationToken cancellationToken = default);
     }
 }

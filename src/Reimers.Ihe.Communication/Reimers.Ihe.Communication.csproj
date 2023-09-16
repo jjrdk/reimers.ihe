@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+	<Import Project="../../shared.proj"/>
 	<PropertyGroup>
 		<PackageId>Reimers.Ihe.Communication</PackageId>
 		<Title>Reimers.Ihe.Communication</Title>
@@ -14,7 +15,6 @@
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 	</ItemGroup>
 
-	<Import Project="../../shared.proj" />
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 		<TreatSpecificWarningsAsErrors />

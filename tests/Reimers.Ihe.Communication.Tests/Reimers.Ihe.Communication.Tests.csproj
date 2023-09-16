@@ -1,18 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <Import Project="../../shared.proj"/>
     <PropertyGroup>
-        <PackageId>Reimers.Ihe.Communication.Tests</PackageId>
-        <Title>reimers.ihe.communication.tests</Title>
-        <Version>0.1.0</Version>
-        <Authors>Jacob Reimers</Authors>
-        <Owners>Jacob Reimers</Owners>
-        <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
-        <Description>Classes to handle MLLP connections and transactions.</Description>
-        <Copyright>Reimers.dk © 2016 - 2017</Copyright>
-        <Company>Reimers.dk</Company>
-        <TargetFramework>net7.0</TargetFramework>
-        <PackageTags>HL7 IHE</PackageTags>
-        <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
+        <RootNamespace>Reimers.Ihe.Communication.Tests</RootNamespace>
     </PropertyGroup>
 
     <PropertyGroup>

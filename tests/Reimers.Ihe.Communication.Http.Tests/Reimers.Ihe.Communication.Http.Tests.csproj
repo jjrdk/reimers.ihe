@@ -1,28 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <Import Project="../../shared.proj"/>
     <PropertyGroup>
-        <PackageId>Reimers.Ihe.Communication.Http.Tests</PackageId>
+        <RootNamespace>Reimers.Ihe.Communication.Http.Tests</RootNamespace>
         <Title>reimers.ihe.communication.tests</Title>
-        <Version>0.1.0</Version>
-        <Authors>Jacob Reimers</Authors>
-        <Owners>Jacob Reimers</Owners>
-        <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
-        <Description>Classes to handle MLLP connections and transactions.</Description>
-        <Copyright>Reimers.dk © 2016 - 2017</Copyright>
-        <Company>Reimers.dk</Company>
-        <TargetFramework>net7.0</TargetFramework>
-        <PackageTags>HL7 IHE</PackageTags>
-        <PackageReleaseNotes>Update to net7.0.</PackageReleaseNotes>
     </PropertyGroup>
 
     <PropertyGroup>
-        <DocumentationFile></DocumentationFile>
         <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
-        <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.0.10" />
+        <PackageReference Include="Microsoft.AspNetCore.TestHost" Condition="'$(TargetFramework)' != 'net6.0'" Version="7.0.11" />
+        <PackageReference Include="Microsoft.AspNetCore.TestHost" Condition="'$(TargetFramework)' == 'net6.0'" Version="6.0.22" />
         <PackageReference Include="NHapi.Model.V251" Version="3.2.0" />
         <PackageReference Include="xunit" Version="2.5.0" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.5.0">

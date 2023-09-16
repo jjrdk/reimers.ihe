@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="IMessageLog.cs" company="Reimers.dk">
-//   Copyright © Reimers.dk 2017
+//   Copyright ï¿½ Reimers.dk 2017
 //   This source is subject to the MIT License.
 //   Please see https://opensource.org/licenses/MIT for details.
 //   All other rights reserved.
@@ -18,6 +18,8 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Buffers;
+
 namespace Reimers.Ihe.Abstractions
 {
     /// <summary>
@@ -28,8 +30,8 @@ namespace Reimers.Ihe.Abstractions
         /// <summary>
         /// Writes the passed message to the log.
         /// </summary>
-        /// <param name="msg"></param>
-        /// <returns></returns>
-        Task Write(string msg);
+        /// <param name="msg">The message to log</param>
+        /// <returns>The async operation as a <see cref="Task"/>.</returns>
+        Task Write(ReadOnlyMemory<char> msg);
     }
 }

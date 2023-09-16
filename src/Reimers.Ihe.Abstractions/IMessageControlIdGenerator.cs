@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="IMessageControlIdGenerator.cs" company="Reimers.dk">
-//   Copyright © Reimers.dk 2017
+//   Copyright ï¿½ Reimers.dk 2017
 //   This source is subject to the MIT License.
 //   Please see https://opensource.org/licenses/MIT for details.
 //   All other rights reserved.
@@ -29,6 +29,6 @@ namespace Reimers.Ihe.Abstractions
 		/// Generates the next message id.
 		/// </summary>
 		/// <returns>The message id as a <see cref="string"/>.</returns>
-		string NextId();
+		ValueTask<string> NextId();
 	}
 }

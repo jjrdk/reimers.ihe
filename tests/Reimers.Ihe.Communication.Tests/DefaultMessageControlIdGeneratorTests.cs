@@ -10,10 +10,10 @@ namespace Reimers.Ihe.Communication.Tests
         public class GivenADefaultMessageControlIdGenerator
         {
             [Fact]
-            public void WhenGeneratingIdThenLengthIsLessThan20Chars()
+            public async Task WhenGeneratingIdThenLengthIsLessThan20Chars()
             {
                 var generator = DefaultMessageControlIdGenerator.Instance;
-                var id = generator.NextId();
+                var id = await generator.NextId();
 
                 Assert.Equal(20, id.Length);
             }

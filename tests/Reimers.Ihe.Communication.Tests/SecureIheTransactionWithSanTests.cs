@@ -18,8 +18,8 @@
         {
             var certificate =
                 X509Certificate2.CreateFromPemFile("cert.pem", "san.pem");
-            var buffer = certificate.Export(X509ContentType.Pfx, (string)null);
-            certificate = new X509Certificate2(buffer, (string)null);
+            var buffer = certificate.Export(X509ContentType.Pfx, (string?)null);
+            certificate = new X509Certificate2(buffer, (string?)null);
             _cert = new X509Certificate2Collection(
                 certificate);
             _server = new MllpServer(
@@ -34,8 +34,8 @@
 
         private static bool UserCertificateValidationCallback(
             object sender,
-            X509Certificate certificate,
-            X509Chain chain,
+            X509Certificate? certificate,
+            X509Chain? chain,
             SslPolicyErrors sslPolicyErrors)
         {
             return true;

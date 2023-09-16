@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DefaultMessageControlIdGenerator.cs" company="Reimers.dk">
-//   Copyright © Reimers.dk 2017
+//   Copyright ï¿½ Reimers.dk 2017
 //   This source is subject to the MIT License.
 //   Please see https://opensource.org/licenses/MIT for details.
 //   All other rights reserved.
@@ -27,7 +27,7 @@ namespace Reimers.Ihe.Abstractions
     public class DefaultMessageControlIdGenerator : IMessageControlIdGenerator
     {
         private int _seed;
-        private static readonly object SyncRoot = new object();
+        private static readonly object SyncRoot = new ();
 
         private DefaultMessageControlIdGenerator()
         {
@@ -36,10 +36,11 @@ namespace Reimers.Ihe.Abstractions
         /// <summary>
         /// Gets the singleton instance of the id generator.
         /// </summary>
-        public static DefaultMessageControlIdGenerator Instance { get; } = new DefaultMessageControlIdGenerator();
+        public static DefaultMessageControlIdGenerator Instance { get; } =
+            new();
 
         /// <inheritdoc />
-        public string NextId()
+        public ValueTask<string> NextId()
         {
             lock (SyncRoot)
             {
@@ -48,7 +49,9 @@ namespace Reimers.Ihe.Abstractions
                 {
                     _seed = 0;
                 }
-                return $"{DateTime.UtcNow:yyyyMMddHHmmss}{counter:D6}";
+
+                return ValueTask.FromResult(
+                    $"{DateTime.UtcNow:yyyyMMddHHmmss}{counter:D6}");
             }
         }
     }

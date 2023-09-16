@@ -18,6 +18,8 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Buffers;
+
 namespace Reimers.Ihe.Communication
 {
     using System;
@@ -44,7 +46,7 @@ namespace Reimers.Ihe.Communication
         }
 
         /// <inheritdoc />
-        public Task Write(string msg)
+        public Task Write(ReadOnlyMemory<char> msg)
         {
             return _output.WriteAsync(msg);
         }

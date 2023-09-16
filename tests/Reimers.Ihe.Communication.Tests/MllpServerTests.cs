@@ -33,7 +33,7 @@
             await using var _ = client.ConfigureAwait(false);
             var adt = new ADT_A01();
             adt.MSH.MessageControlID.Value =
-                DefaultMessageControlIdGenerator.Instance.NextId();
+                await DefaultMessageControlIdGenerator.Instance.NextId();
 
             var response = await client.Send(adt).ConfigureAwait(false);
 

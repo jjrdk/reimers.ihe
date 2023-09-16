@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using NHapi.Model.V251.Message;
 using Reimers.Ihe.Abstractions;
@@ -10,7 +11,7 @@ public class TestDischargeTransactionHandler : IheTransactionHandler<ADT_A03, AC
 
     public override string Version => "2.5.1";
 
-    protected override Task<ACK> HandleInternal(ADT_A03 message)
+    protected override Task<ACK> HandleInternal(ADT_A03 message, CancellationToken cancellationToken = default)
     {
         var result = new ACK();
         result.MSH.MessageControlID.Value = message.MSH.MessageControlID.Value;

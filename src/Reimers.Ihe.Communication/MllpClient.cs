@@ -144,8 +144,8 @@ namespace Reimers.Ihe.Communication
             var hl7 = _parser.Encode(message);
             var bytes = _encoding.GetBytes(hl7);
             var length = bytes.Length
-                         + Constants.StartBlock.Length
-                         + Constants.EndBlock.Length;
+              + Constants.StartBlock.Length
+              + Constants.EndBlock.Length;
             var buffer = ArrayPool<byte>.Shared.Rent(length);
             Array.Copy(
                 Constants.StartBlock,
@@ -169,7 +169,7 @@ namespace Reimers.Ihe.Communication
             var completionSource = new TaskCompletionSource<Hl7Message>();
             var key = message.GetMessageControlId();
             _messages.Add(key, completionSource);
-            await _messageLog.Write(hl7).ConfigureAwait(false);
+            await _messageLog.Write(hl7.AsMemory()).ConfigureAwait(false);
             await _stream
                 .WriteAsync(buffer.AsMemory(0, length), cancellationToken)
                 .ConfigureAwait(false);
@@ -183,7 +183,7 @@ namespace Reimers.Ihe.Communication
         {
             _tcpClient = new TcpClient(_address, _port);
             _remoteAddress = _tcpClient.Client.RemoteEndPoint?.ToString()
-                             ?? string.Empty;
+             ?? string.Empty;
             _stream = _tcpClient.GetStream();
 
             if (_clientCertificates != null)
@@ -222,7 +222,9 @@ namespace Reimers.Ihe.Communication
                 _stream.Close();
             }
             // ReSharper disable once RedundantEmptyFinallyBlock
-            finally { }
+            finally
+            {
+            }
 
             await _stream.DisposeAsync().ConfigureAwait(false);
             _tcpClient.Close();
@@ -233,27 +235,32 @@ namespace Reimers.Ihe.Communication
         private async Task ReadStream(CancellationToken cancellationToken)
         {
             await Task.Yield();
+            var buffer = ArrayPool<byte>.Shared.Rent(_bufferSize);
             try
             {
                 var messageBuilder = new List<byte>();
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     var index = 0;
-                    var buffer = ArrayPool<byte>.Shared.Rent(_bufferSize);
                     var read = await _stream.ReadAsync(
                             buffer.AsMemory(0, _bufferSize),
                             cancellationToken)
                         .ConfigureAwait(false);
                     while (index > -1)
                     {
-                        index = Process(
-                            buffer,
-                            index,
-                            messageBuilder,
-                            read - index);
+                        var result = Process(
+                            buffer.AsSpan(index, Math.Max(0, read - index)),
+                            messageBuilder);
+                        if (result >= 0)
+                        {
+                            index += result;
+                        }
+                        else
+                        {
+                            index = result;
+                        }
                     }
 
-                    ArrayPool<byte>.Shared.Return(buffer);
                     if (index == -2 && _strict)
                     {
                         _stream.Close();
@@ -274,20 +281,22 @@ namespace Reimers.Ihe.Communication
                     _messages.Clear();
                 }
             }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
         }
 
         private int Process(
-            byte[] buffer,
-            int index,
-            List<byte> messageBuilder,
-            int read)
+            Span<byte> buffer,
+            List<byte> messageBuilder)
         {
-            if (read < 0)
+            if (buffer.Length == 0)
             {
                 return -1;
             }
 
-            var isStart = buffer[index] == 11;
+            var isStart = buffer[0] == 11;
             if (isStart)
             {
                 if (messageBuilder.Count > 0)
@@ -296,50 +305,46 @@ namespace Reimers.Ihe.Communication
                     {
                         completionSource.SetException(
                             new Exception(
-                                $"Unexpected character: {buffer[index]:x2}"));
+                                $"Unexpected character: {buffer[0]:x2}"));
                     }
 
                     _messages.Clear();
                 }
             }
 
-            var endblockStart = Array.IndexOf(
-                buffer,
-                Constants.EndBlock[0],
-                index,
-                read);
-            var endblockEnd = endblockStart + 1;
-            var bytes = buffer.Skip(index)
-                .Take(endblockStart > -1 ? endblockStart - index : read);
-            if (isStart)
+            var endBlockStart = buffer.IndexOf(Constants.EndBlock[0]);
+            var endBlockEnd = endBlockStart + 1;
+            var length = endBlockStart > -1 ? endBlockStart : buffer.Length;
+            var bytes = buffer[..length];
+            if (isStart && bytes.Length > 0)
             {
-                bytes = bytes.Skip(1);
+                bytes = bytes[1..];
             }
 
-            if (buffer[endblockEnd] == Constants.EndBlock[1])
+            for (int i = 0; i < bytes.Length; i++)
             {
-                //var count = messageBuilder.Count;
-                messageBuilder.AddRange(bytes);
-                //count = messageBuilder.Count - count;
-                //index += count;
-                var s = _encoding.GetString(messageBuilder.ToArray());
-                messageBuilder.Clear();
-                var msg = _parser.Parse(s);
-                var message = new Hl7Message(msg, _remoteAddress);
-                var controlId = msg.GetMessageControlId();
-                var completionSource = _messages[controlId];
-                _messages.Remove(controlId);
-                completionSource.SetResult(message);
-                return buffer.Skip(endblockEnd).TakeWhile(b => b > 0).Any()
-                    ? endblockEnd + 1
+                messageBuilder.Add(bytes[i]);
+            }
+
+            if (buffer[endBlockEnd] != Constants.EndBlock[1])
+            {
+                return endBlockStart == -1
+                    ? -1
+                    : buffer[endBlockEnd..].IndexOf(Constants.StartBlock[0]);
+            }
+
+            var s = _encoding.GetString(messageBuilder.ToArray());
+            messageBuilder.Clear();
+            var msg = _parser.Parse(s);
+            var message = new Hl7Message(msg, _remoteAddress);
+            var controlId = msg.GetMessageControlId();
+            var source = _messages[controlId];
+            _messages.Remove(controlId);
+            source.SetResult(message);
+            return buffer.Length > endBlockEnd + 1
+             && buffer[endBlockEnd + 1] > 0
+                    ? endBlockEnd + 1
                     : -2;
-            }
-
-            messageBuilder.AddRange(bytes);
-
-            return endblockStart == -1
-                ? -1
-                : Array.IndexOf(buffer, Constants.StartBlock[0], endblockEnd);
         }
     }
 }

@@ -49,8 +49,8 @@ namespace Reimers.Ihe.Communication.Tests
 
         private static bool UserCertificateValidationCallback(
             object sender,
-            X509Certificate certificate,
-            X509Chain chain,
+            X509Certificate? certificate,
+            X509Chain? chain,
             SslPolicyErrors sslPolicyErrors)
         {
             return true;

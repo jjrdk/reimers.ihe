@@ -227,14 +227,14 @@ namespace Reimers.Ihe.Communication
             var message = new Hl7Message(
                 received,
                 _client.Client.RemoteEndPoint?.ToString() ?? string.Empty);
-            await _messageLog.Write(s).ConfigureAwait(false);
+            await _messageLog.Write(s.AsMemory()).ConfigureAwait(false);
             var result = await _middleware.Handle(message, cancellationToken)
                 .ConfigureAwait(false);
 
             var resultMsg = _parser.Encode(result);
             await WriteToStream(resultMsg, cancellationToken)
                 .ConfigureAwait(false);
-            await _messageLog.Write(resultMsg).ConfigureAwait(false);
+            await _messageLog.Write(resultMsg.AsMemory()).ConfigureAwait(false);
         }
 
         private async Task WriteToStream(
@@ -242,7 +242,7 @@ namespace Reimers.Ihe.Communication
             CancellationToken cancellationToken)
         {
             await _asyncLock.WaitAsync(cancellationToken).ConfigureAwait(false);
-            await _messageLog.Write(response).ConfigureAwait(false);
+            await _messageLog.Write(response.AsMemory()).ConfigureAwait(false);
             var bytes = _encoding.GetBytes(response).AsMemory();
             var count = bytes.Length + 3;
             var buffer = ArrayPool<byte>.Shared.Rent(count);
