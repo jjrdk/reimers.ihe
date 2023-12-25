@@ -28,14 +28,13 @@
             var address = IPAddress.IPv6Loopback;
             var client = await MllpClient.Create(
                      address.ToString(),
-                     2575)
-                 .ConfigureAwait(false);
+                     2575);
             await using var _ = client.ConfigureAwait(false);
             var adt = new ADT_A01();
             adt.MSH.MessageControlID.Value =
                 await DefaultMessageControlIdGenerator.Instance.NextId();
 
-            var response = await client.Send(adt).ConfigureAwait(false);
+            var response = await client.Send(adt);
 
             Assert.NotNull(response.Message);
         }
@@ -44,7 +43,7 @@
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-            _server?.DisposeAsync().AsTask().Wait();
+            _server.DisposeAsync().AsTask().Wait();
         }
     }
 }

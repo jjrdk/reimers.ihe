@@ -28,7 +28,7 @@ namespace Reimers.Ihe.Communication.Tests
                 adt.MSH.MessageControlID.Value = await generator.NextId();
 
                 var msg = new Hl7Message(adt, "");
-                var response = await _defaultHl7MessageMiddleware.Handle(msg).ConfigureAwait(false);
+                var response = await _defaultHl7MessageMiddleware.Handle(msg);
 
                 Assert.NotNull(response);
             }
@@ -42,7 +42,7 @@ PID|1||10006579^^^1^MRN^1||DUCK^DONALD^D||19241010|M||1|111^DUCK ST^^FOWL^CA^999
 PV1|1|I|IN1^214^1^1^^^S|3||IN1^214^1|37^DISNEY^WALT^^^^^^AccMgr^^^^CI|||01||||1|||37^DISNEY^WALT^^^^^^AccMgr^^^^CI|2|40007716^^^AccMgr^VN|4||||||||||||||||1|||1||P|||20050110045253|20050112152000|3115.89|3115.89|||");
 
                 var msg = new Hl7Message(adt, "");
-                var response = await _defaultHl7MessageMiddleware.Handle(msg).ConfigureAwait(false);
+                var response = await _defaultHl7MessageMiddleware.Handle(msg);
 
                 Assert.NotNull(response);
             }
@@ -179,7 +179,7 @@ ADD|contain RBCs.Certain tests, e.g.Glucose, may be decreased while
 ADD|others e.g.Potassiumor LDH may be elevated.");
 
                 var msg = new Hl7Message(adt, "");
-                var response = await _defaultHl7MessageMiddleware.Handle(msg).ConfigureAwait(false);
+                var response = await _defaultHl7MessageMiddleware.Handle(msg);
 
                 Assert.NotNull(response);
             }

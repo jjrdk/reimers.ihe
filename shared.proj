@@ -6,7 +6,7 @@
         <Owners>Jacob Reimers</Owners>
         <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
         <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
-        <PackageReleaseNotes>Improve network reads by using spans for read data. Add support for net8.0-rc1</PackageReleaseNotes>
+        <PackageReleaseNotes>Improve network reads by using spans for read data. Add support for net8.0</PackageReleaseNotes>
         <Copyright>Reimers.dk (c) 2016 - 2023</Copyright>
         <Company>Reimers.dk</Company>
         <GeneratePackageOnBuild>False</GeneratePackageOnBuild>

@@ -48,8 +48,7 @@ namespace Reimers.Ihe.Communication.Tests
             IMessageControlIdGenerator generator =
                 DefaultMessageControlIdGenerator.Instance;
             var client = await MllpClient
-                .Create(IPAddress.Loopback.ToString(), Port)
-                .ConfigureAwait(false);
+                .Create(IPAddress.Loopback.ToString(), Port);
             await using var _ = client.ConfigureAwait(false);
             var request = new SSU_U03();
             request.MSH.MessageControlID.Value = await generator.NextId();
@@ -57,7 +56,7 @@ namespace Reimers.Ihe.Communication.Tests
             var obx = container.AddOBX();
             var observer = obx.GetResponsibleObserver(0);
             observer.IDNumber.Value = "operatorId";
-            var response = await client.Send(request).ConfigureAwait(false);
+            var response = await client.Send(request);
             Assert.NotNull(response);
         }
 
@@ -65,11 +64,11 @@ namespace Reimers.Ihe.Communication.Tests
         public async Task WhenSendingMessageThenGetsAck()
         {
             IMessageControlIdGenerator generator = DefaultMessageControlIdGenerator.Instance;
-            var client = await MllpClient.Create(IPAddress.Loopback.ToString(), Port, bufferSize: 30).ConfigureAwait(false);
+            var client = await MllpClient.Create(IPAddress.Loopback.ToString(), Port, bufferSize: 30);
             await using var _ = client.ConfigureAwait(false);
             var request = new QBP_Q11();
             request.MSH.MessageControlID.Value = await generator.NextId();
-            var response = await client.Send(request).ConfigureAwait(false);
+            var response = await client.Send(request);
             Assert.NotNull(response);
         }
 
@@ -84,16 +83,16 @@ namespace Reimers.Ihe.Communication.Tests
                         {
                             var client = await MllpClient.Create(
                                 IPAddress.Loopback.ToString(),
-                                Port).ConfigureAwait(false);
+                                Port);
                             await using var __ = client.ConfigureAwait(false);
                             var request = new QBP_Q11();
                             request.MSH.MessageControlID.Value = await generator.NextId();
                             var response =
-                                await client.Send(request).ConfigureAwait(false);
+                                await client.Send(request);
                             return response.Message is ACK;
                         });
 
-            var results = await Task.WhenAll(tasks).ConfigureAwait(false);
+            var results = await Task.WhenAll(tasks);
 
             Assert.All(results, Assert.True);
         }
@@ -105,7 +104,7 @@ namespace Reimers.Ihe.Communication.Tests
             var client = await MllpClient.Create(
                 IPAddress.Loopback.ToString(),
                 Port,
-                strict: false).ConfigureAwait(false);
+                strict: false);
             await using var __ = client.ConfigureAwait(false);
 
             var tasks = Enumerable.Repeat(false, 300)
@@ -116,11 +115,11 @@ namespace Reimers.Ihe.Communication.Tests
                             request.MSH.MessageControlID.Value = await generator.NextId();
                             var response =
                                 // ReSharper disable once AccessToDisposedClosure
-                                await client.Send(request).ConfigureAwait(false);
+                                await client.Send(request);
                             return response.Message is ACK;
                         });
 
-            var results = await Task.WhenAll(tasks).ConfigureAwait(false);
+            var results = await Task.WhenAll(tasks);
 
             Assert.All(results, Assert.True);
         }
@@ -129,7 +128,7 @@ namespace Reimers.Ihe.Communication.Tests
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-            _server?.DisposeAsync().AsTask().Wait();
+            _server.DisposeAsync().AsTask().Wait();
         }
     }
 }

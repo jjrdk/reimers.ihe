@@ -135,7 +135,9 @@ namespace Reimers.Ihe.Communication
                 {
                     var index = 0;
                     var buffer = ArrayPool<byte>.Shared.Rent(_bufferSize);
-                    var read = await _stream.ReadAsync(buffer.AsMemory(0, _bufferSize), cancellationToken)
+                    var read = await _stream.ReadAsync(
+                            buffer.AsMemory(0, _bufferSize),
+                            cancellationToken)
                         .ConfigureAwait(false);
                     while (true)
                     {
@@ -144,14 +146,20 @@ namespace Reimers.Ihe.Communication
                             buffer.AsSpan(index, length),
                             messageBuilder,
                             cancellationToken);
-                        if (nextIndex == -1) { break; }
+                        if (nextIndex == -1)
+                        {
+                            break;
+                        }
 
                         index += nextIndex;
                     }
+
                     ArrayPool<byte>.Shared.Return(buffer);
                 }
             }
-            catch (TaskCanceledException) { }
+            catch (TaskCanceledException)
+            {
+            }
             catch (IOException io)
             {
                 var msg = io.Message;
@@ -165,12 +173,16 @@ namespace Reimers.Ihe.Communication
         }
 
         // ReSharper disable once CognitiveComplexity
-        private int Process(Span<byte> buffer, List<byte> messageBuilder, CancellationToken cancellationToken)
+        private int Process(
+            Span<byte> buffer,
+            List<byte> messageBuilder,
+            CancellationToken cancellationToken)
         {
             if (buffer.Length == 0)
             {
                 return -1;
             }
+
             var isStart = buffer[0] == 11;
             if (isStart)
             {
@@ -178,13 +190,14 @@ namespace Reimers.Ihe.Communication
                 {
                     throw new Exception(
                         "Unexpected character: "
-                        + buffer[0].ToString("x2"));
+                      + buffer[0].ToString("x2"));
                 }
             }
 
             var endBlockStart = buffer.IndexOf(Constants.EndBlock[0]);
             var endBlockEnd = endBlockStart + 1;
-            var bytes = buffer[..(endBlockStart > -1 ? endBlockStart : buffer.Length)];
+            var bytes =
+                buffer[..(endBlockStart > -1 ? endBlockStart : buffer.Length)];
             if (isStart)
             {
                 bytes = bytes.Length == 0 ? bytes : bytes[1..];
@@ -196,6 +209,7 @@ namespace Reimers.Ihe.Communication
                 {
                     messageBuilder.Add(t);
                 }
+
                 _ = SendResponse(messageBuilder.ToArray(), cancellationToken)
                     .ConfigureAwait(false);
                 messageBuilder.Clear();
@@ -213,7 +227,8 @@ namespace Reimers.Ihe.Communication
                 return -1;
             }
 
-            var newStartBlock = buffer[endBlockEnd..].IndexOf(Constants.StartBlock[0]);
+            var newStartBlock =
+                buffer[endBlockEnd..].IndexOf(Constants.StartBlock[0]);
             return newStartBlock == -1 ? -1 : newStartBlock + endBlockEnd;
         }
 
@@ -232,31 +247,33 @@ namespace Reimers.Ihe.Communication
                 .ConfigureAwait(false);
 
             var resultMsg = _parser.Encode(result);
-            await WriteToStream(resultMsg, cancellationToken)
+            await WriteToStream(resultMsg.AsMemory(), cancellationToken)
                 .ConfigureAwait(false);
             await _messageLog.Write(resultMsg.AsMemory()).ConfigureAwait(false);
         }
 
         private async Task WriteToStream(
-            string response,
+            ReadOnlyMemory<char> response,
             CancellationToken cancellationToken)
         {
             await _asyncLock.WaitAsync(cancellationToken).ConfigureAwait(false);
-            await _messageLog.Write(response.AsMemory()).ConfigureAwait(false);
-            var bytes = _encoding.GetBytes(response).AsMemory();
-            var count = bytes.Length + 3;
+            await _messageLog.Write(response).ConfigureAwait(false);
+            var bytes = ArrayPool<byte>.Shared.Rent(response.Length);
+            var read = _encoding.GetBytes(response.Span, bytes.AsSpan());
+            var count = read + 3;
             var buffer = ArrayPool<byte>.Shared.Rent(count);
             Constants.StartBlock.CopyTo(buffer, 0);
-            bytes.CopyTo(buffer.AsMemory(1));
-            Constants.EndBlock.CopyTo(buffer, bytes.Length + 1);
+            bytes.AsSpan(0, read).CopyTo(buffer.AsSpan(1));
+            Constants.EndBlock.CopyTo(buffer, read + 1);
 
             await _stream.WriteAsync(
                     buffer.AsMemory(
-                    0,
-                    count),
+                        0,
+                        count),
                     cancellationToken)
                 .ConfigureAwait(false);
             await _stream.FlushAsync(cancellationToken).ConfigureAwait(false);
+            ArrayPool<byte>.Shared.Return(bytes);
             ArrayPool<byte>.Shared.Return(buffer);
             _asyncLock.Release(1);
         }

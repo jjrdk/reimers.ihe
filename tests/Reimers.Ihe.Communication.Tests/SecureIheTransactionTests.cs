@@ -64,10 +64,10 @@ namespace Reimers.Ihe.Communication.Tests
                 Port,
                 clientCertificates: _cert,
                 userCertificateValidationCallback:
-                UserCertificateValidationCallback).ConfigureAwait(false);
+                UserCertificateValidationCallback);
             var request = new QBP_Q11();
             request.MSH.MessageControlID.Value = "test";
-            var response = await client.Send(request).ConfigureAwait(false);
+            var response = await client.Send(request);
             Assert.NotNull(response);
         }
 
